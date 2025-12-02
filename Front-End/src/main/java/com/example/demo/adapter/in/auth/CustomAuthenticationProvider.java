@@ -14,8 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import com.example.demo.adapter.in.auth.CustomAuthFailureHandler.AccountCreatedException;
-import com.example.demo.adapter.in.auth.CustomAuthFailureHandler.UserExistsException;
 import com.example.demo.application.ports.out.UserPortOut;
 import com.example.demo.domain.User;
 
@@ -26,6 +24,20 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 @Component
 public class CustomAuthenticationProvider implements AuthenticationProvider {
+	
+	@SuppressWarnings("serial")
+	public static class AccountCreatedException extends AuthenticationException {
+        public AccountCreatedException(String msg) {
+            super(msg);
+        }
+    }
+    
+    @SuppressWarnings("serial")
+    public static class UserExistsException extends AuthenticationException {
+        public UserExistsException(String msg) {
+            super(msg);
+        }
+    }
 	
 	User user;
 
@@ -85,7 +97,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     }
     
     public boolean ifLogin(jakarta.servlet.http.HttpSession session) {
-    	user = userPortOut.load(user, session.getId(), register, login);
+    	user = getUserPortOut().load(user, session.getId(), register, login);
     	
     	if (user == null) {
             return false;
@@ -138,7 +150,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         } else if(register && !login) {
         	ifRegister(request);
         	
-        	user = userPortOut.load(user, session.getId(), register, login);
+        	user = getUserPortOut().load(user, session.getId(), register, login);
         	
         	if(user == null) {
         		return false;
@@ -171,4 +183,12 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     public boolean supports(Class<?> authentication) {
         return authentication.equals(UsernamePasswordAuthenticationToken.class);
     }
+
+	public UserPortOut getUserPortOut() {
+		return userPortOut;
+	}
+
+	public void setUserPortOut(UserPortOut userPortOut) {
+		this.userPortOut = userPortOut;
+	}
 }

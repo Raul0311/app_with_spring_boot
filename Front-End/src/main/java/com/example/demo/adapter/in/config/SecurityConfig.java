@@ -26,23 +26,22 @@ public class SecurityConfig {
 
     // AuthenticationManager personalizado
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+    AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authentication -> customAuthProvider.authenticate(authentication);
     }
-    
+
     @Bean
-    public HttpSessionEventPublisher httpSessionEventPublisher(UserAdapterOut userService) {
+    HttpSessionEventPublisher httpSessionEventPublisher(UserAdapterOut userService) {
         return new CustomHttpSessionEventPublisher(userService);
     }
-    
+
     // Configuración de seguridad
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomAuthFailureHandler failureHandler) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, CustomAuthFailureHandler failureHandler) throws Exception {
         http
         	.authorizeHttpRequests(auth -> auth
-    			.requestMatchers("/auth", "/auth/register", "/static/js/**", "/static/css/**").permitAll()
-        	    .requestMatchers("/private/**").hasRole("USER")
-        	    .anyRequest().permitAll()
+        	    .requestMatchers("/**").permitAll()
+        	    .requestMatchers("/private/**").hasAnyRole("USER")
             )
             // Configuración del login
             .formLogin(form -> form

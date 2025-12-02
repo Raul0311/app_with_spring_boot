@@ -23,9 +23,9 @@ public class ControllerAdapterIn {
 
     // Página de login
     @GetMapping("/auth/**")
-    public ModelAndView auth(@RequestParam(value = "error", required = false) String error,
-                              @RequestParam(value = "logout", required = false) String logout,
-                              @RequestParam(value = "registered", required = false) String registered,
+    public ModelAndView auth(@RequestParam(required = false) String error,
+                              @RequestParam(required = false) String logout,
+                              @RequestParam(required = false) String registered,
                               Authentication auth) {
     	
     	String view = userPortIn.load(auth);
@@ -45,8 +45,6 @@ public class ControllerAdapterIn {
         }
     	
         return model;
-        
-        
     }
     
     // Página privada
@@ -55,14 +53,9 @@ public class ControllerAdapterIn {
         return "private/home"; 
     }
     
-    @GetMapping("/logout")
-    public String logout() {
-        return "redirect:/auth?logout=true";
-    }
-    
     @GetMapping("/register")
-    public ModelAndView register(@RequestParam(value = "error", required = false) String error,
-                              @RequestParam(value = "logout", required = false) String logout,
+    public ModelAndView register(@RequestParam(required = false) String error,
+                              @RequestParam(required = false) String logout,
                               Authentication auth) {
     	
     	return new ModelAndView("redirect:/auth/register");

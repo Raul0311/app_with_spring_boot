@@ -80,7 +80,7 @@ public class CustomHttpSessionEventPublisher extends HttpSessionEventPublisher {
         
         try {
             userService.deleteUserToken(currentHttpSession);
-            // System.out.println("Sesión destruida correctamente! ID: " + currentHttpSession);
+            System.out.println("Sesión destruida correctamente! ID: " + currentHttpSession);
         } catch (Exception e) {
             // Manejar error sin romper el logout
             System.err.println("No se pudo eliminar el token de sesión: " + e.getMessage());
