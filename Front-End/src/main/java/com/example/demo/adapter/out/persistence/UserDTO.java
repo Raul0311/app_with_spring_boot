@@ -96,6 +96,15 @@ public class UserDTO {
     public Long getId() {
         return id;
     }
+    
+    /**
+	 * Sets the id.
+	 *
+	 * @param id the new id
+	 */
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     /**
 	 * Gets the username.

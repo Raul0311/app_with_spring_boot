@@ -8,8 +8,8 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 @Configuration
 public class MvcConfig implements WebMvcConfigurer {
 
-	@Bean
-    public InternalResourceViewResolver viewResolver() {
+    @Bean
+    InternalResourceViewResolver viewResolver() {
         InternalResourceViewResolver resolver = new InternalResourceViewResolver();
         resolver.setPrefix("/WEB-INF/views/");  // coincide con webapp/WEB-INF/views/
         resolver.setSuffix(".jsp");
