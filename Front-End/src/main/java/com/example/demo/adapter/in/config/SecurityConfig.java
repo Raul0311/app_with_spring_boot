@@ -40,8 +40,8 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http, CustomAuthFailureHandler failureHandler) throws Exception {
         http
         	.authorizeHttpRequests(auth -> auth
+    			.requestMatchers("/private/**").hasRole("USER")
         	    .requestMatchers("/**").permitAll()
-        	    .requestMatchers("/private/**").hasAnyRole("USER")
             )
             // Configuración del login
             .formLogin(form -> form

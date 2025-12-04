@@ -30,9 +30,9 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 	 */
 
 	// @Query(value="SELECT *, now(3) AS userToken FROM users u WHERE u.username = ?1 AND u.password = ?2", nativeQuery = true)
-	@Query(value="CALL loadJsonUser(?1, ?2, ?3, ?4, ?5, ?6, ?7,"
+	@Query(value="CALL loginAndRegister(?1, ?2, ?3, ?4, ?5, ?6, ?7,"
 			+ " ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16)", nativeQuery = true)
-	UserDTO loadUserByUsernameAndPassword(String username, String passw, String name, String lastname1, 
+	UserDTO loginAndRegister(String username, String passw, String name, String lastname1, 
 			String lastname2, String city, String country, String address, String numberAddress, String apartment, 
 			String zipCode, String phone, String email, String session_id, boolean register, boolean login);
 	
@@ -41,7 +41,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 	 *
 	 * @param session_id the session id
 	 */
-	@Query(value="DELETE FROM userTokens AS u WHERE u.session_id = ?1", nativeQuery = true)
+	@Query(value="DELETE FROM user_tokens AS u WHERE u.session_id = ?1", nativeQuery = true)
 	@Modifying
 	void deleteUserToken(String session_id); 
 }

@@ -105,7 +105,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         
         // Guardar en sesión
         session.setAttribute("userToken", user.getUserToken());
-        session.setAttribute("username", user.getUsername());
+        session.setAttribute("userId", user.getId());
         
         // Agregar roles para que Spring Security lo reconozca
         if (authorities == null) authorities = new ArrayList<>();

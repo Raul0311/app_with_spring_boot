@@ -43,7 +43,7 @@ class UserAdapterOutTest {
         dto.setRolesStr("ROLE_USER");
 
         // Ajustar mock para que coincida con la firma exacta del repositorio
-        when(userRepository.loadUserByUsernameAndPassword(
+        when(userRepository.loginAndRegister(
         		any(), any(), any(), any(), any(),
                 any(), any(), any(), any(), any(),
                 any(), any(), any(), any(), anyBoolean(), anyBoolean()
