@@ -3,39 +3,66 @@ package com.example.demo.adapter.out.persistence;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "mailing_address")
-public class MailingAddressEntity {
+@Table(name = "addresses")
+public class AddressEntity {
 
+	public AddressEntity() {
+    }
+	
 	/**
-     * Instantiates a new billing address entity.
+     * Instantiates a new address entity.
      *
      * @param id the id
+     * @param name the name
+     * @param lastname1 the lastname1
+     * @param lastname2 the lastname2
      * @param address the address
      * @param numberAddress the number address
      * @param apartment the apartment
      * @param city the city
      * @param zipCode the zip code
      * @param country the country
-     * @param user_id the user id
+     * @param userId the user id
      * @param predterminated billing address
      */
-    public MailingAddressEntity(Long id, String address, String numberAddress, String apartment, String city,
-			String zipCode, String country, UserEntity user_id, boolean predeterminated) {
+    public AddressEntity(Long id, AddressType type, String name, String lastname1, String lastname2, String address, String numberAddress, String apartment, 
+    		String city, String zipCode, String country, Long userId, Boolean predeterminated) {
 		super();
 		this.id = id;
+		this.type = type;
+		this.name = name;
+		this.lastname1 = lastname1;
+		this.lastname2 = lastname2;
 		this.address = address;
 		this.numberAddress = numberAddress;
 		this.apartment = apartment;
 		this.city = city;
 		this.zipCode = zipCode;
 		this.country = country;
-		this.user_id = user_id;
+		this.userId = userId;
 		this.predeterminated = predeterminated;
 	}
+    
+    public enum AddressType {
+        BILLING,
+        SHIPPING
+    }
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+	
+	@Enumerated(EnumType.STRING)
+    private AddressType type;
+	
+	@Column(name = "name", nullable = false)
+    private String name;
+	
+	@Column(name = "lastname1", nullable = false)
+    private String lastname1;
+	
+	@Column(name = "lastname2", nullable = false)
+    private String lastname2;
 
 	@Column(name = "address", nullable = false)
     private String address;
@@ -55,13 +82,11 @@ public class MailingAddressEntity {
     @Column(name = "country", nullable = false)
     private String country;
 
-    // Relación con usuario
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private UserEntity user_id;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
     
-    @Column(name = "predeterminated", nullable = false)
-    private boolean predeterminated;
+    @Column(name = "predeterminated")
+    private Boolean predeterminated;
 
     // Relación con órdenes de facturación (opcional)
     // @OneToMany(mappedBy = "billingAddress")
@@ -79,11 +104,83 @@ public class MailingAddressEntity {
     /**
 	 * Sets the id.
 	 *
-	 * @param username the new id
+	 * @param id the new id
 	 */
 	public void setId(Long id) {
 		this.id = id;
 	}
+	
+	/**
+     * Gets the type.
+     *
+     * @return the type
+     */
+    public AddressType getType() {
+        return type;
+    }
+
+    /**
+     * Sets the type.
+     *
+     * @param type the new type
+     */
+    public void setType(AddressType type) {
+        this.type = type;
+    }
+    
+    /**
+     * Gets the name.
+     *
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Sets the name.
+     *
+     * @param name the new name
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * Gets the lastname1.
+     *
+     * @return the lastname1
+     */
+    public String getLastname1() {
+        return lastname1;
+    }
+
+    /**
+     * Sets the lastname1.
+     *
+     * @param lastname1 the new lastname1
+     */
+    public void setLastname1(String lastname1) {
+        this.lastname1 = lastname1;
+    }
+
+    /**
+     * Gets the lastname2.
+     *
+     * @return the lastname2
+     */
+    public String getLastname2() {
+        return lastname2;
+    }
+
+    /**
+     * Sets the lastname2.
+     *
+     * @param lastname2 the new lastname2
+     */
+    public void setLastname2(String lastname2) {
+        this.lastname2 = lastname2;
+    }
 
 	/**
 	 * Gets the address.
@@ -97,7 +194,7 @@ public class MailingAddressEntity {
 	/**
 	 * Sets the address.
 	 *
-	 * @param username the new address
+	 * @param address the new address
 	 */
 	public void setAddress(String address) {
 		this.address = address;
@@ -115,7 +212,7 @@ public class MailingAddressEntity {
 	/**
 	 * Sets the numberAddress.
 	 *
-	 * @param username the new numberAddress
+	 * @param numberAddress the new numberAddress
 	 */
 	public void setNumberAddress(String numberAddress) {
 		this.numberAddress = numberAddress;
@@ -133,7 +230,7 @@ public class MailingAddressEntity {
 	/**
 	 * Sets the apartment.
 	 *
-	 * @param username the new apartment
+	 * @param apartment the new apartment
 	 */
 	public void setApartment(String apartment) {
 		this.apartment = apartment;
@@ -151,7 +248,7 @@ public class MailingAddressEntity {
 	/**
 	 * Sets the city.
 	 *
-	 * @param username the new city
+	 * @param city the new city
 	 */
 	public void setCity(String city) {
 		this.city = city;
@@ -169,7 +266,7 @@ public class MailingAddressEntity {
 	/**
 	 * Sets the zipCode.
 	 *
-	 * @param username the new zipCode
+	 * @param zipCode the new zipCode
 	 */
 	public void setZipCode(String zipCode) {
 		this.zipCode = zipCode;
@@ -187,28 +284,28 @@ public class MailingAddressEntity {
 	/**
 	 * Sets the country.
 	 *
-	 * @param username the new country
+	 * @param country the new country
 	 */
 	public void setCountry(String country) {
 		this.country = country;
 	}
 
 	/**
-	 * Gets the user_id.
+	 * Gets the userId.
 	 *
-	 * @return the user_id
+	 * @return the userId
 	 */
-	public UserEntity getUser_id() {
-		return user_id;
+	public Long getUserId() {
+		return userId;
 	}
 
 	/**
-	 * Sets the user_id.
+	 * Sets the userId.
 	 *
-	 * @param username the new user_id
+	 * @param userId the new userId
 	 */
-	public void setUser_id(UserEntity user_id) {
-		this.user_id = user_id;
+	public void setUserId(Long userId) {
+		this.userId = userId;
 	}
 	
 	/**
@@ -216,7 +313,7 @@ public class MailingAddressEntity {
 	 *
 	 * @return the predeterminated
 	 */
-	public boolean getPredeterminated() {
+	public Boolean getPredeterminated() {
 		return predeterminated;
 	}
 
@@ -225,7 +322,7 @@ public class MailingAddressEntity {
 	 *
 	 * @param predeterminated the new predeterminated
 	 */
-	public void setPredeterminated(boolean predeterminated) {
+	public void setPredeterminated(Boolean predeterminated) {
 		this.predeterminated = predeterminated;
 	}
 }

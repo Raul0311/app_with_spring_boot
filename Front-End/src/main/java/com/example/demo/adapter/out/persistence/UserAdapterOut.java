@@ -32,17 +32,17 @@ public class UserAdapterOut implements UserPortOut {
 		UserDTO userDTO = null;
 		try {
 			if(register && login) {
-				userDTO = userRepository.loadUserByUsernameAndPassword(user.getUsername(), user.getPassw(), user.getName(), 
+				userDTO = userRepository.loginAndRegister(user.getUsername(), user.getPassw(), user.getName(), 
 						user.getLastname1(), user.getLastname2(), user.getCity(), user.getCountry(), user.getAddress(), 
 						user.getNumberAddress(), user.getApartment(), user.getZipCode(), user.getPhone(), 
 						user.getEmail(), session_id, register, login);
 			} else if(register && !login) {
-				userDTO = userRepository.loadUserByUsernameAndPassword(user.getUsername(), user.getPassw(), user.getName(), 
+				userDTO = userRepository.loginAndRegister(user.getUsername(), user.getPassw(), user.getName(), 
 						user.getLastname1(), user.getLastname2(), user.getCity(), user.getCountry(), user.getAddress(), 
 						user.getNumberAddress(), user.getApartment(), user.getZipCode(), user.getPhone(), 
 						user.getEmail(), session_id, register, login);
 			} else if(!register && login) {
-				userDTO = userRepository.loadUserByUsernameAndPassword(user.getUsername(), user.getPassw(), 
+				userDTO = userRepository.loginAndRegister(user.getUsername(), user.getPassw(), 
 						null, null, null, null, null, null, null, null, null, null, null, session_id, register, login);
 			}
 			

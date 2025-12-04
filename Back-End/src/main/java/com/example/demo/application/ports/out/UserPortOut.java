@@ -1,0 +1,25 @@
+package com.example.demo.application.ports.out;
+
+import com.example.demo.domain.User;
+/**
+ * The Interface UserPortOut.
+ */
+public interface UserPortOut {
+	
+	/**
+	 * Load.
+	 *
+	 * @param userId the user id
+	 * @param userToken the user token
+	 * @return the user
+	 */
+	User load(Long userId, String userToken);
+	
+	/**
+	 * ValidateUser.
+	 *
+	 * @param userId the userId
+	 * @param userToken the user token
+	 */
+	void validateUser(Long userId, String userToken);
+}
