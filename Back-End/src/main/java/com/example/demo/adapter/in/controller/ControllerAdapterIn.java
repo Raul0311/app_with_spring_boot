@@ -41,8 +41,7 @@ public class ControllerAdapterIn {
 	@Operation(summary = "Crear una dirección", description = "Crea una dirección ya sea de facturación o de envío del usuario")
     public Address createAddress(@RequestParam String userToken,
                                        @RequestBody Address address) {
-		System.out.println(address.getName());
-		System.out.println(address.getUserId());
+		
         return addressPortIn.save(userToken, address);
     }
 
@@ -50,6 +49,7 @@ public class ControllerAdapterIn {
     @Operation(summary = "Modificar una dirección", description = "Modifica una dirección ya sea de facturación o de envío del usuario")
     public Address updateAddress(@RequestParam String userToken,
                                        @RequestBody Address address) {
+    	
         return addressPortIn.update(userToken, address);
     }
 
@@ -58,6 +58,7 @@ public class ControllerAdapterIn {
     public void deleteAddress(@RequestParam Long userId,
                               @RequestParam String userToken,
                               @PathVariable Long id) {
+    	
         addressPortIn.delete(userId, userToken, id);
     }
     
@@ -67,18 +68,21 @@ public class ControllerAdapterIn {
                                   @RequestParam String userToken,
                                   @PathVariable Long id,
                                   @RequestParam AddressType type) {
+    	
         addressPortIn.setDefault(userId, userToken, id, type);
     }
 
     @GetMapping("/getUser")
     @Operation(summary = "Obtiene el usuario", description = "Obtiene el usuario por id")
     public User getUser(@RequestParam Long userId, @RequestParam String userToken) {
-        // Validar que el token es correcto para ese usuario
-        User user = userPortIn.load(userId, userToken);
-        if (user == null) {
-            // Si no se encuentra o token inválido, lanzamos excepción
-            throw new RuntimeException("Usuario no encontrado o token inválido");
-        }
-        return user;
+    	
+        return userPortIn.load(userId, userToken);
+    }
+    
+    @PutMapping("/updateUser")
+    @Operation(summary = "Modificar el usuario", description = "Modifica el usuario por id")
+    public User updateUser(@RequestParam String userToken, @RequestParam User user) {
+
+        return userPortIn.update(user, userToken);
     }
 }

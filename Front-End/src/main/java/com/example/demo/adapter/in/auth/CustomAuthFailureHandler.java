@@ -6,6 +6,10 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.stereotype.Component;
 
 import com.example.demo.adapter.in.auth.CustomAuthenticationProvider.AccountCreatedException;
+import com.example.demo.adapter.in.auth.CustomAuthenticationProvider.EmailDoesNotExist;
+import com.example.demo.adapter.in.auth.CustomAuthenticationProvider.LinkSentSuccessfully;
+import com.example.demo.adapter.in.auth.CustomAuthenticationProvider.PasswordDoesNotReset;
+import com.example.demo.adapter.in.auth.CustomAuthenticationProvider.ResetPasswordSuccessfully;
 import com.example.demo.adapter.in.auth.CustomAuthenticationProvider.UserExistsException;
 
 import jakarta.servlet.ServletException;
@@ -26,6 +30,26 @@ public class CustomAuthFailureHandler implements AuthenticationFailureHandler {
 
 	    if (exception instanceof UserExistsException) {
 	        response.sendRedirect("/auth/register?error=userexists");
+	        return;
+	    }
+	    
+	    if (exception instanceof LinkSentSuccessfully) {
+	        response.sendRedirect("/auth/forgot-password?msg=sent");
+	        return;
+	    }
+
+	    if (exception instanceof EmailDoesNotExist) {
+	        response.sendRedirect("/auth/forgot-password?error=notfound");
+	        return;
+	    }
+	    
+	    if (exception instanceof ResetPasswordSuccessfully) {
+	        response.sendRedirect("/auth/reset-password?msg=resetpass");
+	        return;
+	    }
+
+	    if (exception instanceof PasswordDoesNotReset) {
+	        response.sendRedirect("/auth/reset-password?error=true");
 	        return;
 	    }
 

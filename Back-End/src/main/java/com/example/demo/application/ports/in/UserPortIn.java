@@ -15,4 +15,12 @@ public interface UserPortIn {
 	 * @return the user
 	 */
 	User load(Long id, String userToken);
+	
+	/**
+	 * Update.
+	 *
+	 * @param user the user
+	 * @return the updated user
+	 */
+	User update(User user, String userToken);
 }

@@ -16,7 +16,7 @@ public interface UserPortOut {
 	 * @param login the login
 	 * @return the user
 	 */
-	User load(User user, String session_id, boolean register, boolean login);
+	String load(User user, String session_id, boolean register, boolean login);
 	
 	/**
 	 * deleteUserToken.
@@ -24,4 +24,18 @@ public interface UserPortOut {
 	 * @param session_id the session_id
 	 */
 	void deleteUserToken(String session_id);
+	
+	/**
+	 * forgotPassword.
+	 *
+	 * @param email the email
+	 */
+	String forgotPassword(String email);
+	
+	/**
+	 * resetPassword.
+	 *
+	 * @param newPass the newPass
+	 */
+	Integer resetPassword(String newPass, String token);
 }

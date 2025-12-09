@@ -23,8 +23,16 @@ public class UserUsecase implements UserPortIn {
 	    	ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
             String path = attr.getRequest().getRequestURI();
             
-            if ("/auth/register".equals(path)) {
+            if("/auth/register".equals(path)) {
                 return "register";
+            }
+            
+            if("/auth/forgot-password".equals(path)) {
+                return "forgot-password";
+            }
+            
+            if("/auth/reset-password".equals(path)) {
+                return "reset-password";
             }
 	        
 	        return "auth";

@@ -62,9 +62,7 @@ public class AddressAdapterOut implements AddressPortOut {
             addressRepository.clearDefault(address.getUserId(), address.getType().name());
         }
         
-        AddressEntity addressEntity = AddressMapper.toEntity(address);
-        address = AddressMapper.toDomain(addressRepository.save(addressEntity));
-        return address;
+        return AddressMapper.toDomain(addressRepository.save(AddressMapper.toEntity(address)));
     }
 
     @Override
@@ -74,16 +72,13 @@ public class AddressAdapterOut implements AddressPortOut {
         if (!addressRepository.existsById(address.getId())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Address not found");
         }
-        System.out.println(address.getUserId());
-        System.out.println(address.getType());
+        
         if (Boolean.TRUE.equals(address.getPredeterminated())) {
             // Desmarcar la anterior predeterminada del mismo tipo
             addressRepository.clearDefault(address.getUserId(), address.getType().name());
         }
-        
-        AddressEntity addressEntity = AddressMapper.toEntity(address);
-        address = AddressMapper.toDomain(addressRepository.save(addressEntity));
-        return address;
+
+        return AddressMapper.toDomain(addressRepository.save(AddressMapper.toEntity(address)));
     }
 
     @Override

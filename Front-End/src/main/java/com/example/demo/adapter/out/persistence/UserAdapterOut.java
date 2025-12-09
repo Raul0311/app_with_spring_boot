@@ -8,7 +8,7 @@ import com.example.demo.domain.User;
 import jakarta.transaction.Transactional;
 
 /**
- * The Class UserService.
+ * The Class UserAdapterOut.
  */
 @Service
 public class UserAdapterOut implements UserPortOut {
@@ -28,36 +28,45 @@ public class UserAdapterOut implements UserPortOut {
 	 * @return the user
 	 */
 	@Override
-	public User load(User user, String session_id, boolean register, boolean login) {
-		UserDTO userDTO = null;
-		try {
-			if(register && login) {
-				userDTO = userRepository.loginAndRegister(user.getUsername(), user.getPassw(), user.getName(), 
-						user.getLastname1(), user.getLastname2(), user.getCity(), user.getCountry(), user.getAddress(), 
-						user.getNumberAddress(), user.getApartment(), user.getZipCode(), user.getPhone(), 
-						user.getEmail(), session_id, register, login);
-			} else if(register && !login) {
-				userDTO = userRepository.loginAndRegister(user.getUsername(), user.getPassw(), user.getName(), 
-						user.getLastname1(), user.getLastname2(), user.getCity(), user.getCountry(), user.getAddress(), 
-						user.getNumberAddress(), user.getApartment(), user.getZipCode(), user.getPhone(), 
-						user.getEmail(), session_id, register, login);
-			} else if(!register && login) {
-				userDTO = userRepository.loginAndRegister(user.getUsername(), user.getPassw(), 
-						null, null, null, null, null, null, null, null, null, null, null, session_id, register, login);
-			}
-			
-			if (userDTO != null) {
-                userDTO.setPassw(null);
-            }
-		} catch (Exception e) {
-		    throw new RuntimeException("DB error: " + e.getMessage(), e);
-		}
+	public String load(User user, String session_id, boolean register, boolean login) {
+		String userData = null;
+	    // UserDTO userDTO = null;
+	    
+	    try {
+	        // Llamada al SP
+	        if (register && login) {
+	        	userData = userRepository.loginAndRegister(user.getUsername(), user.getPassw(), user.getName(), 
+	                    user.getLastname1(), user.getLastname2(), user.getCity(), user.getCountry(), user.getAddress(), 
+	                    user.getNumberAddress(), user.getApartment(), user.getZipCode(), user.getPhone(), 
+	                    user.getEmail(), session_id, register, login);
+	        	System.out.println(userData);
+	        } else if (register && !login) {
+	        	userData = userRepository.loginAndRegister(user.getUsername(), user.getPassw(), user.getName(), 
+	                    user.getLastname1(), user.getLastname2(), user.getCity(), user.getCountry(), user.getAddress(), 
+	                    user.getNumberAddress(), user.getApartment(), user.getZipCode(), user.getPhone(), 
+	                    user.getEmail(), session_id, register, login);
+	        	System.out.println(userData);
+	        } else if (!register && login) {
+	        	userData = userRepository.login(user.getUsername(), user.getPassw(), session_id);
+	        	System.out.println(userData);
+	        }
+	        
+	        // || userDTO.getId() == null
+	        if (userData == null) {
+		        return null;
+		    }
+            
+            // Siempre poner la contraseña a null antes de devolver
+	        /*if (userDTO != null) {
+	            userDTO.setPassw(null);
+	        }*/
 
-		if (userDTO == null || userDTO.getId() == null) {
-            return null; 
-        }
+	    } catch (Exception e) {
+	        throw new RuntimeException("DB error: " + e.getMessage(), e);
+	    }
 
-	    return UserMapper.DTOtoDomain(userDTO);
+	    //UserMapper.DTOtoDomain(userDTO)
+	    return userData;
 	}
 	
 	/**
@@ -72,6 +81,34 @@ public class UserAdapterOut implements UserPortOut {
 			userRepository.deleteUserToken(id_session);
 		} catch (Exception e) {
 			throw new RuntimeException("Internal server error deleting user token", e);
+		}
+	}
+
+	/**
+	 * forgotPassword.
+	 *
+	 * @param email the email
+	 */
+	@Override
+	public String forgotPassword(String email) {
+		try {
+			return userRepository.forgotPassword(email);
+		} catch (Exception e) {
+			throw new RuntimeException("Internal server error sending email", e);
+		}
+	}
+
+	/**
+	 * resetPassword.
+	 *
+	 * @param newPass the newPass
+	 */
+	@Override
+	public Integer resetPassword(String newPass, String token) {
+		try {
+			return userRepository.resetPassword(newPass, token);
+		} catch (Exception e) {
+			throw new RuntimeException("Internal server error resetting password", e);
 		}
 	}
 }
