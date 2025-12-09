@@ -44,4 +44,14 @@ public class UserAdapterOut implements UserPortOut {
         return UserMapper.toDomain(userEntity);
     }
 
+	@Override
+	public User update(User user, String userToken) {
+		validateUser(user.getId(), userToken);
+		if (!userRepository.existsById(user.getId())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Address not found");
+        }
+		
+		return UserMapper.toDomain(userRepository.save(UserMapper.toEntity(user)));
+	}
+
 }

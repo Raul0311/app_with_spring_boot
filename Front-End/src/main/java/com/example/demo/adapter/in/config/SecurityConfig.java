@@ -23,7 +23,7 @@ public class SecurityConfig {
     public SecurityConfig(CustomAuthenticationProvider customAuthProvider) {
         this.customAuthProvider = customAuthProvider;
     }
-
+    
     // AuthenticationManager personalizado
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
@@ -41,6 +41,7 @@ public class SecurityConfig {
         http
         	.authorizeHttpRequests(auth -> auth
     			.requestMatchers("/private/**").hasRole("USER")
+    			// "/auth", "/register", "/auth/register", "/static/**"
         	    .requestMatchers("/**").permitAll()
             )
             // Configuración del login

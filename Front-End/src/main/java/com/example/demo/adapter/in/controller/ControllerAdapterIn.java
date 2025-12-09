@@ -55,10 +55,22 @@ public class ControllerAdapterIn {
     
     @GetMapping("/register")
     public ModelAndView register(@RequestParam(required = false) String error,
-                              @RequestParam(required = false) String logout,
                               Authentication auth) {
     	
     	return new ModelAndView("redirect:/auth/register");
     }
+    
+    @GetMapping("/forgot-password")
+    public ModelAndView forgotPassword(@RequestParam(required = false) String error,
+            Authentication auth) {
+    	
+        return new ModelAndView("redirect:/auth/forgot-password");
+    }
+    
+    @GetMapping("/reset-password")
+    public ModelAndView resetPassword(@RequestParam(required = false) String error,
+            Authentication auth) {
 
+        return new ModelAndView("redirect:/auth/reset-password");
+    }
 }

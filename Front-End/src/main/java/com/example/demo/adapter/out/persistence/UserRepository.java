@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
 	/**
-	 * Find by user.
+	 * Login and Register.
 	 *
 	 * @param username       the username
 	 * @param passw          the password
@@ -32,9 +32,20 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 	// @Query(value="SELECT *, now(3) AS userToken FROM users u WHERE u.username = ?1 AND u.password = ?2", nativeQuery = true)
 	@Query(value="CALL loginAndRegister(?1, ?2, ?3, ?4, ?5, ?6, ?7,"
 			+ " ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16)", nativeQuery = true)
-	UserDTO loginAndRegister(String username, String passw, String name, String lastname1, 
+	String loginAndRegister(String username, String passw, String name, String lastname1, 
 			String lastname2, String city, String country, String address, String numberAddress, String apartment, 
 			String zipCode, String phone, String email, String session_id, boolean register, boolean login);
+	
+	/**
+	 * Find by user.
+	 *
+	 * @param username       the username
+	 * @param passw          the password
+	 * @param session_id     the current session identifier
+	 * @return               the JSON containing the user id, token and roles
+	 */
+	@Query(value="CALL login(?1, ?2, ?3)", nativeQuery = true)
+	String login(String username, String passw, String session_id);
 	
 	/**
 	 * Delete userToken.
@@ -43,5 +54,21 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 	 */
 	@Query(value="DELETE FROM user_tokens AS u WHERE u.session_id = ?1", nativeQuery = true)
 	@Modifying
-	void deleteUserToken(String session_id); 
+	void deleteUserToken(String session_id);
+	
+	/**
+	 * Send email.
+	 *
+	 * @param email the email
+	 */
+	@Query(value="CALL forgotPassword(?1)", nativeQuery = true)
+	String forgotPassword(String email);
+	
+	/**
+	 * Reset password.
+	 *
+	 * @param newPass the new password
+	 */
+	@Query(value="CALL resetPassword(?1, ?2)", nativeQuery = true)
+	Integer resetPassword(String newPass, String token);
 }

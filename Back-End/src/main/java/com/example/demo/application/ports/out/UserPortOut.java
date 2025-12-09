@@ -18,8 +18,17 @@ public interface UserPortOut {
 	/**
 	 * ValidateUser.
 	 *
-	 * @param userId the userId
+	 * @param userId the user id
 	 * @param userToken the user token
 	 */
 	void validateUser(Long userId, String userToken);
+	
+	/**
+	 * Update.
+	 *
+	 * @param user the user
+	 * @param userToken the user token
+	 * @return the updated user
+	 */
+	User update(User user, String userToken);
 }

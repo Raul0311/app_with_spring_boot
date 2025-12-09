@@ -21,5 +21,11 @@ public class UserUsecase implements UserPortIn {
 		return userPortOut.load(id, userToken);
 	}
 
+	@Override
+	public User update(User user, String userToken) {
+		
+		return userPortOut.update(user, userToken);
+	}
+
 	
 }
