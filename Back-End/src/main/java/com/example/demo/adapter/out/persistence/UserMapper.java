@@ -45,6 +45,7 @@ public class UserMapper {
      */
     public static UserEntity toEntity(User user) {
         UserEntity userEntity = new UserEntity();
+        userEntity.setId(user.getId());
         userEntity.setUsername(user.getUsername());
         userEntity.setPassw(user.getPassw());
         userEntity.setEmail(user.getEmail());

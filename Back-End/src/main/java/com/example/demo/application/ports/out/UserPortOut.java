@@ -30,5 +30,14 @@ public interface UserPortOut {
 	 * @param userToken the user token
 	 * @return the updated user
 	 */
-	User update(User user, String userToken);
+	void update(User user, String userToken);
+	
+	/**
+	 * DisableUser.
+	 *
+	 * @param userId the user id
+	 * @param userToken the user token
+	 * @return the eliminated user
+	 */
+	void disableUser(Long userId, String userToken);
 }

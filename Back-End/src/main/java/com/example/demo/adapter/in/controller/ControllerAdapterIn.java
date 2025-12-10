@@ -2,6 +2,7 @@ package com.example.demo.adapter.in.controller;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -81,8 +82,16 @@ public class ControllerAdapterIn {
     
     @PutMapping("/updateUser")
     @Operation(summary = "Modificar el usuario", description = "Modifica el usuario por id")
-    public User updateUser(@RequestParam String userToken, @RequestParam User user) {
+    public ResponseEntity<Void> updateUser(@RequestParam String userToken, @RequestBody User user) {
+    	userPortIn.update(user, userToken);
+        return ResponseEntity.ok().build();
+    }
+    
+    @PutMapping("/users/disable")
+    @Operation(summary = "Eliminar cuenta del usuario", description = "Elimina la cuenta del usuario poniendo el campo enabled a false")
+    public ResponseEntity<Void> disableUser(@RequestParam String userToken, @RequestParam Long userId) {
 
-        return userPortIn.update(user, userToken);
+        userPortIn.disableUser(userId, userToken);
+        return ResponseEntity.ok().build();
     }
 }
