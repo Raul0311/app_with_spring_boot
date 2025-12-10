@@ -2,7 +2,9 @@ package com.example.demo.adapter.in.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,64 +36,85 @@ public class ControllerAdapterIn {
 
 	@GetMapping("/getAddresses")
     @Operation(summary = "Obtener direcciones", description = "Devuelve las direcciones de facturación y de envío del usuario")
-    public List<Address> getAddresses(@RequestParam Long userId, @RequestParam String userToken) {
-		return addressPortIn.load(userId, userToken);
+    public List<Address> getAddresses(Authentication authentication) {
+		Long userId = (Long) authentication.getPrincipal();
+		
+		return addressPortIn.load(userId);
     }
 	
 	@PostMapping("/setAddress")
 	@Operation(summary = "Crear una dirección", description = "Crea una dirección ya sea de facturación o de envío del usuario")
-    public Address createAddress(@RequestParam String userToken,
+    public ResponseEntity<Void> createAddress(Authentication authentication,
                                        @RequestBody Address address) {
+		Long userId = (Long) authentication.getPrincipal();
+		address.setUserId(userId);
+		addressPortIn.save(address);
 		
-        return addressPortIn.save(userToken, address);
+        return ResponseEntity.ok().build();
     }
 
     @PutMapping("/updateAddress")
     @Operation(summary = "Modificar una dirección", description = "Modifica una dirección ya sea de facturación o de envío del usuario")
-    public Address updateAddress(@RequestParam String userToken,
+    public ResponseEntity<Void> updateAddress(Authentication authentication,
                                        @RequestBody Address address) {
+    	Long userId = (Long) authentication.getPrincipal();
     	
-        return addressPortIn.update(userToken, address);
+    	if (address.getUserId() == null || !address.getUserId().equals(userId)) {
+            // Esto es un error de autorización. Debería ser 403 Forbidden.
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+    	
+        addressPortIn.update(address);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/deleteAddress/{id}")
     @Operation(summary = "Eliminar una dirección", description = "Elimina una dirección ya sea de facturación o de envío del usuario")
-    public void deleteAddress(@RequestParam Long userId,
-                              @RequestParam String userToken,
-                              @PathVariable Long id) {
+    public ResponseEntity<Void> deleteAddress(Authentication authentication, @PathVariable Long id) {
+    	Long userId = (Long) authentication.getPrincipal();
     	
-        addressPortIn.delete(userId, userToken, id);
+        addressPortIn.delete(userId, id);
+        return ResponseEntity.ok().build();
     }
     
     @PutMapping("/{id}/default")
     @Operation(summary = "Cambiar dirección predeterminada", description = "Cambia la dirección predeterminada ya sea de facturación o de envío del usuario")
-    public void setDefaultAddress(@RequestParam Long userId,
-                                  @RequestParam String userToken,
+    public ResponseEntity<Void> setDefaultAddress(Authentication authentication,
                                   @PathVariable Long id,
                                   @RequestParam AddressType type) {
+    	Long userId = (Long) authentication.getPrincipal();
     	
-        addressPortIn.setDefault(userId, userToken, id, type);
+        addressPortIn.setDefault(userId, id, type);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/getUser")
     @Operation(summary = "Obtiene el usuario", description = "Obtiene el usuario por id")
-    public User getUser(@RequestParam Long userId, @RequestParam String userToken) {
+    public User getUser(Authentication authentication) {
+    	Long userId = (Long) authentication.getPrincipal();
     	
-        return userPortIn.load(userId, userToken);
+        return userPortIn.load(userId);
     }
     
     @PutMapping("/updateUser")
     @Operation(summary = "Modificar el usuario", description = "Modifica el usuario por id")
-    public ResponseEntity<Void> updateUser(@RequestParam String userToken, @RequestBody User user) {
-    	userPortIn.update(user, userToken);
+    public ResponseEntity<Void> updateUser(Authentication authentication, @RequestBody User user) {
+    	Long userId = (Long) authentication.getPrincipal();
+    	
+    	if (!user.getId().equals(userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+       }
+    	
+    	userPortIn.update(user);
         return ResponseEntity.ok().build();
     }
     
     @PutMapping("/users/disable")
     @Operation(summary = "Eliminar cuenta del usuario", description = "Elimina la cuenta del usuario poniendo el campo enabled a false")
-    public ResponseEntity<Void> disableUser(@RequestParam String userToken, @RequestParam Long userId) {
-
-        userPortIn.disableUser(userId, userToken);
+    public ResponseEntity<Void> disableUser(Authentication authentication) {
+    	Long userId = (Long) authentication.getPrincipal();
+    	
+        userPortIn.disableUser(userId);
         return ResponseEntity.ok().build();
     }
 }

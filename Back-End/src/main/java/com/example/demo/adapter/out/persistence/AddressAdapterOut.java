@@ -18,25 +18,43 @@ import jakarta.transaction.Transactional;
  */
 @Service
 public class AddressAdapterOut implements AddressPortOut {
+	
+	@SuppressWarnings("serial")
+    public class AddressSaveException extends RuntimeException {
+        public AddressSaveException(String message) {
+            super(message);
+        }
+    }
+
+    @SuppressWarnings("serial")
+    public class AddressUpdateException extends RuntimeException {
+        public AddressUpdateException(String message) {
+            super(message);
+        }
+    }
+
+    @SuppressWarnings("serial")
+    public class AddressDeleteException extends RuntimeException {
+        public AddressDeleteException(String message) {
+            super(message);
+        }
+    }
+    
+    @SuppressWarnings("serial")
+    public class AddressDefaultChangeException extends RuntimeException {
+        public AddressDefaultChangeException(String message) {
+            super(message);
+        }
+    }
 
 	private final AddressRepository addressRepository;
-    private final UserRepository userRepository;
 
-    public AddressAdapterOut(AddressRepository addressRepository, UserRepository userRepository) {
+    public AddressAdapterOut(AddressRepository addressRepository) {
         this.addressRepository = addressRepository;
-        this.userRepository = userRepository;
     }
 
     @Override
-    public void validateUser(Long userId, String userToken) {
-        Integer result = userRepository.validateUserTokenByUserIdAndUserToken(userId, userToken);
-        boolean valid = result != null && result == 1;
-        if (!valid) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid user token");
-    }
-
-    @Override
-    public List<Address> load(Long userId, String userToken) {
-        validateUser(userId, userToken);
+    public List<Address> load(Long userId) {
         List<AddressEntity> addressesEntity = addressRepository.findByUserId(userId);
 
         List<Address> addresses = new ArrayList<>();
@@ -50,8 +68,7 @@ public class AddressAdapterOut implements AddressPortOut {
 
     @Override
     @Transactional
-    public Address save(String userToken, Address address) {
-        validateUser(address.getUserId(), userToken);
+    public void save(Address address) {
         
         if (address.getUserId() == null) {
             throw new IllegalArgumentException("userId es obligatorio en la dirección");
@@ -61,14 +78,13 @@ public class AddressAdapterOut implements AddressPortOut {
             // Desmarcar la anterior predeterminada del mismo tipo
             addressRepository.clearDefault(address.getUserId(), address.getType().name());
         }
-        
-        return AddressMapper.toDomain(addressRepository.save(AddressMapper.toEntity(address)));
+        Address newAddress = AddressMapper.toDomain(addressRepository.save(AddressMapper.toEntity(address)));
+        if(newAddress == null) throw new AddressSaveException("No se pudo guardar la nueva dirección.");
     }
 
     @Override
     @Transactional
-    public Address update(String userToken, Address address) {
-        validateUser(address.getUserId(), userToken);
+    public void update(Address address) {
         if (!addressRepository.existsById(address.getId())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Address not found");
         }
@@ -77,28 +93,32 @@ public class AddressAdapterOut implements AddressPortOut {
             // Desmarcar la anterior predeterminada del mismo tipo
             addressRepository.clearDefault(address.getUserId(), address.getType().name());
         }
-
-        return AddressMapper.toDomain(addressRepository.save(AddressMapper.toEntity(address)));
+        
+        Address updatedAddress = AddressMapper.toDomain(addressRepository.save(AddressMapper.toEntity(address)));
+        if(updatedAddress == null) throw new AddressUpdateException("No se pudo actualizar la dirección.");
     }
 
     @Override
     @Transactional
-    public void delete(Long userId, String userToken, Long addressId) {
-        validateUser(userId, userToken);
+    public void delete(Long userId, Long addressId) {
         AddressEntity addr = addressRepository.findById(addressId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Address not found"));
 
         if (Boolean.TRUE.equals(addr.getPredeterminated())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot delete default address");
         }
-
-        addressRepository.deleteById(addressId);
+        
+        try {
+        	addressRepository.deleteById(addressId);
+        } catch(AddressDeleteException e) {
+    		throw new AddressDeleteException("Fallo al intentar eliminar la dirección con ID: " + addressId);
+    	}
     }
     
     @Override
     @Transactional
-    public void setDefault(Long userId, String userToken, Long addressId, AddressType type) {
-        validateUser(userId, userToken);
-        addressRepository.setDefaultAddress(addressId, userId, type.name());
+    public void setDefault(Long userId, Long addressId, AddressType type) {
+    	Integer result = addressRepository.setDefaultAddress(addressId, userId, type.name());
+        if(result == 0) throw new AddressDefaultChangeException("No se pudo establecer la dirección " + addressId + " como predeterminada.");
     }
 }

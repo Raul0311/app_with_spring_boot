@@ -10,34 +10,30 @@ public interface UserPortOut {
 	 * Load.
 	 *
 	 * @param userId the user id
-	 * @param userToken the user token
 	 * @return the user
 	 */
-	User load(Long userId, String userToken);
+	User load(Long userId);
 	
 	/**
 	 * ValidateUser.
 	 *
-	 * @param userId the user id
 	 * @param userToken the user token
 	 */
-	void validateUser(Long userId, String userToken);
+	Long validateUser(String userToken);
 	
 	/**
 	 * Update.
 	 *
 	 * @param user the user
-	 * @param userToken the user token
 	 * @return the updated user
 	 */
-	void update(User user, String userToken);
+	void update(User user);
 	
 	/**
 	 * DisableUser.
 	 *
 	 * @param userId the user id
-	 * @param userToken the user token
 	 * @return the eliminated user
 	 */
-	void disableUser(Long userId, String userToken);
+	void disableUser(Long userId);
 }

@@ -41,15 +41,12 @@ public class UserAdapterOut implements UserPortOut {
     }
 
     @Override
-    public void validateUser(Long userId, String userToken) {
-        Integer result = userRepository.validateUserTokenByUserIdAndUserToken(userId, userToken);
-        if (result == 0) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid user token or user");
+    public Long validateUser(String userToken) {
+        return userRepository.validateUserTokenByUserToken(userToken);
     }
 
     @Override
-    public User load(Long userId, String userToken) {
-        validateUser(userId, userToken);
-
+    public User load(Long userId) {
         UserEntity userEntity = userRepository.findById(userId)
             .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con id: " + userId));
         userEntity.setPassw(null);
@@ -58,8 +55,7 @@ public class UserAdapterOut implements UserPortOut {
     }
 
 	@Override
-	public void update(User user, String userToken) {
-		validateUser(user.getId(), userToken);
+	public void update(User user) {
 		if (!userRepository.existsById(user.getId())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
@@ -73,9 +69,7 @@ public class UserAdapterOut implements UserPortOut {
 	}
 
 	@Override
-	public void disableUser(Long userId, String userToken) {
-		validateUser(userId, userToken);
-		
+	public void disableUser(Long userId) {
 		Integer updated = userRepository.disableUser(userId);
 		if (updated == 0) throw new UserDisableException("No se ha podido eliminar la cuenta");
 	}

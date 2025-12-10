@@ -19,36 +19,36 @@ public class AddressUsecase implements AddressPortIn {
 	}
 
 	@Override
-	public List<Address> load(Long userId, String userToken) {
+	public List<Address> load(Long userId) {
 		
-		return addressPortOut.load(userId, userToken);
+		return addressPortOut.load(userId);
 	}
 
 	@Override
-    public Address save(String userToken, Address address) {
+    public void save(Address address) {
 		if (address.getUserId() == null) {
             throw new IllegalArgumentException("userId es obligatorio en la dirección");
         }
 		
-        return addressPortOut.save(userToken, address);
+        addressPortOut.save(address);
     }
 
     @Override
-    public Address update(String userToken, Address address) {
+    public void update(Address address) {
     	if (address.getUserId() == null || address.getId() == null) {
             throw new IllegalArgumentException("userId y id de dirección son obligatorios");
         }
     	
-        return addressPortOut.update(userToken, address);
+        addressPortOut.update(address);
     }
 
     @Override
-    public void delete(Long userId, String userToken, Long addressId) {
-        addressPortOut.delete(userId, userToken, addressId);
+    public void delete(Long userId, Long addressId) {
+        addressPortOut.delete(userId, addressId);
     }
     
     @Override
-    public void setDefault(Long userId, String userToken, Long addressId, AddressType type) {
-        addressPortOut.setDefault(userId, userToken, addressId, type);
+    public void setDefault(Long userId, Long addressId, AddressType type) {
+        addressPortOut.setDefault(userId, addressId, type);
     }
 }
