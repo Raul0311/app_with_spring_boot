@@ -20,16 +20,6 @@ public interface AddressRepository extends JpaRepository<AddressEntity, Long> {
 	List<AddressEntity> findByUserId(Long userId);
 	
 	/**
-	 * Find by userId and type.
-	 *
-	 * @param userId the userId
-	 * @param type the type
-	 * @return the addresses
-	 */
-	@Query(value="DELETE FROM userTokens AS u WHERE u.session_id = ?1", nativeQuery = true)
-    List<AddressEntity> findByUserIdAndType(Long userId, String type);
-	
-	/**
 	 * Delete by id.
 	 *
 	 * @param id the id
@@ -49,7 +39,7 @@ public interface AddressRepository extends JpaRepository<AddressEntity, Long> {
 	@Modifying
     @Transactional
     @Query(value = "UPDATE addresses SET predeterminated = CASE WHEN id = ?1 THEN TRUE ELSE FALSE END WHERE user_id = ?2 AND type = ?3", nativeQuery = true)
-    void setDefaultAddress(Long addressId, Long userId, String type);
+    Integer setDefaultAddress(Long addressId, Long userId, String type);
 	
 	/**
 	 * Clear predeterminated Address.
@@ -60,5 +50,5 @@ public interface AddressRepository extends JpaRepository<AddressEntity, Long> {
 	@Modifying
     @Transactional
 	@Query(value = "UPDATE addresses SET predeterminated = false WHERE user_id = ?1 AND type = ?2 AND predeterminated = true", nativeQuery = true)
-	public void clearDefault(Long userId, String type);
+	Integer clearDefault(Long userId, String type);
 }

@@ -39,16 +39,13 @@ public class UserAdapterOut implements UserPortOut {
 	                    user.getLastname1(), user.getLastname2(), user.getCity(), user.getCountry(), user.getAddress(), 
 	                    user.getNumberAddress(), user.getApartment(), user.getZipCode(), user.getPhone(), 
 	                    user.getEmail(), session_id, register, login);
-	        	System.out.println(userData);
 	        } else if (register && !login) {
 	        	userData = userRepository.loginAndRegister(user.getUsername(), user.getPassw(), user.getName(), 
 	                    user.getLastname1(), user.getLastname2(), user.getCity(), user.getCountry(), user.getAddress(), 
 	                    user.getNumberAddress(), user.getApartment(), user.getZipCode(), user.getPhone(), 
 	                    user.getEmail(), session_id, register, login);
-	        	System.out.println(userData);
 	        } else if (!register && login) {
 	        	userData = userRepository.login(user.getUsername(), user.getPassw(), session_id);
-	        	System.out.println(userData);
 	        }
 	        
 	        // || userDTO.getId() == null

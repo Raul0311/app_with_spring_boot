@@ -16,20 +16,20 @@ public class UserUsecase implements UserPortIn {
 	}
 
 	@Override
-	public User load(Long id, String userToken) {
+	public User load(Long id) {
 		
-		return userPortOut.load(id, userToken);
+		return userPortOut.load(id);
 	}
 
 	@Override
-	public void update(User user, String userToken) {
+	public void update(User user) {
 		
-		userPortOut.update(user, userToken);
+		userPortOut.update(user);
 	}
 
 	@Override
-	public void disableUser(Long userId, String userToken) {
+	public void disableUser(Long userId) {
 		
-		userPortOut.disableUser(userId, userToken);
+		userPortOut.disableUser(userId);
 	}
 }

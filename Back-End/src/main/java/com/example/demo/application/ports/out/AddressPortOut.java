@@ -13,49 +13,40 @@ public interface AddressPortOut {
 	 * Load.
 	 *
 	 * @param userId the user id
-	 * @param userToken the user token
 	 * @return the addresses
 	 */
-	List<Address> load(Long userId, String userToken);
-	
-	/**
-	 * ValidateUser.
-	 *
-	 * @param userId the userId
-	 * @param userToken the user token
-	 */
-	void validateUser(Long userId, String userToken);
+	List<Address> load(Long userId);
 	
 	/**
 	 * Save.
 	 *
-	 * @param userId the user id
+	 * @param address the address
 	 * @return the addresses
 	 */
-	Address save(String userToken, Address address);
+	void save(Address address);
 
 	/**
 	 * Update.
 	 *
-	 * @param userId the user id
+	 * @param address the address
 	 * @return the addresses
 	 */
-	Address update(String userToken, Address address);
+	void update(Address address);
 
     /**
 	 * Delete.
 	 *
 	 * @param userId the user id
+	 * @param addressId the address id
 	 */
-    void delete(Long userId, String userToken, Long addressId);
+    void delete(Long userId, Long addressId);
     
     /**
 	 * SetDefault.
 	 *
 	 * @param userId the user id
-	 * @param userToken the user token
 	 * @param addressId the address id
 	 * @param type the type
 	 */
-    void setDefault(Long userId, String userToken, Long addressId, AddressType type);
+    void setDefault(Long userId, Long addressId, AddressType type);
 }
