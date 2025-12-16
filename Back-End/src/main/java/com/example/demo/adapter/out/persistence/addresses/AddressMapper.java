@@ -1,56 +1,28 @@
 package com.example.demo.adapter.out.persistence.addresses;
 
+import org.mapstruct.Mapper;
+
 import com.example.demo.domain.Address;
 
-public class AddressMapper {
+/**
+ * The Interface AddressMapper.
+ */
+@Mapper(componentModel = "spring")
+public interface AddressMapper {
 
     /**
-     * Convierte una AddressEntity (persistencia) a Address (dominio)
+     * Convierte una AddressEntity (persistencia) a Address (dominio).
+     *
+     * @param addressEntity the address entity
+     * @return the address
      */
-    public static Address toDomain(AddressEntity entity) {
-        if (entity == null) {
-            return null;
-        }
-
-        return new Address(
-                entity.getId(),
-                entity.getType(),
-                entity.getName(),
-                entity.getLastname1(),
-                entity.getLastname2(),
-                entity.getAddress(),
-                entity.getNumberAddress(),
-                entity.getApartment(),
-                entity.getCity(),
-                entity.getZipCode(),
-                entity.getCountry(),
-                entity.getUserId(),
-                entity.getPredeterminated()
-        );
-    }
+	Address toDomain(AddressEntity addressEntity);
 
     /**
-     * Convierte una Address (dominio) a AddressEntity (persistencia)
+     * Convierte una Address (dominio) a AddressEntity (persistencia).
+     *
+     * @param address the address
+     * @return the address entity
      */
-    public static AddressEntity toEntity(Address domain) {
-        if (domain == null) {
-            return null;
-        }
-
-        return new AddressEntity(
-                domain.getId(),
-                domain.getType(),
-                domain.getName(),
-                domain.getLastname1(),
-                domain.getLastname2(),
-                domain.getAddress(),
-                domain.getNumberAddress(),
-                domain.getApartment(),
-                domain.getCity(),
-                domain.getZipCode(),
-                domain.getCountry(),
-                domain.getUserId(),
-                domain.getPredeterminated()
-        );
-    }
+	AddressEntity toEntity(Address address);
 }

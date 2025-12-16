@@ -10,7 +10,7 @@ public interface UserPortIn {
 	/**
 	 * Load.
 	 *
-	 * @param userId the user id
+	 * @param id the id
 	 * @return the user
 	 */
 	User load(Long id);

@@ -12,24 +12,48 @@ import com.example.demo.domain.dto.RoleCreationDto;
 import com.example.demo.domain.dto.RoleDto;
 import com.example.demo.domain.dto.UserWithRolesDto;
 
+/**
+ * The Class RoleUsecase.
+ */
 @Service
 public class RoleUsecase implements RolesPortIn {
 	
+	/** The roles port out. */
 	private final RolesPortOut rolesPortOut;
 	
+	/** The Constant DEFAULT_ADMIN_ID. */
 	private static final Long DEFAULT_ADMIN_ID = 1L;
+	
+	/** The Constant ADMIN_ROLE. */
 	private static final String ADMIN_ROLE = "ROLE_ADMIN";
+	
+	/** The Constant USER_ROLE. */
 	private static final String USER_ROLE = "ROLE_USER";
 	
+	/**
+	 * Instantiates a new role usecase.
+	 *
+	 * @param rolesPortOut the roles port out
+	 */
 	public RoleUsecase(RolesPortOut rolesPortOut) {
 		this.rolesPortOut = rolesPortOut;
 	}
 
+	/**
+	 * Gets the all users with roles.
+	 *
+	 * @return the all users with roles
+	 */
 	@Override
 	public List<UserWithRolesDto> getAllUsersWithRoles() {
 		return rolesPortOut.loadAllUsersWithRoles();
 	}
 
+	/**
+	 * Gets the all roles.
+	 *
+	 * @return the all roles
+	 */
 	@Override
 	public List<RoleDto> getAllRoles() {
 		return rolesPortOut.loadAllRoles();
@@ -38,10 +62,12 @@ public class RoleUsecase implements RolesPortIn {
 	/**
 	 * Implementa la validación de seguridad (no quitar ROLE_ADMIN a uno mismo)
 	 * y realiza una actualización eficiente (solo INSERT/DELETE de roles cambiados).
+	 *
+	 * @param authenticatedUserId the authenticated user id
+	 * @param command the command
 	 */
 	@Override
 	public void updateUserRoles(Long authenticatedUserId, RoleUpdateCommand command) {
-        final String ADMIN_ROLE = "ROLE_ADMIN";
         
         // Cargar roles actuales del usuario que se va a modificar
         UserWithRolesDto targetUserRoles = rolesPortOut.loadUserWithRoles(command.userId());
@@ -90,6 +116,11 @@ public class RoleUsecase implements RolesPortIn {
         }
 	}
 	
+	/**
+	 * Creates the new role.
+	 *
+	 * @param roleDto the role dto
+	 */
 	@Override
 	public void createNewRole(RoleCreationDto roleDto) {
 	    if (roleDto.name() == null || roleDto.name().trim().isEmpty()) {
@@ -103,6 +134,11 @@ public class RoleUsecase implements RolesPortIn {
 	    rolesPortOut.saveRole(finalRoleName, roleDto.description());
 	}
 	
+	/**
+	 * Delete role.
+	 *
+	 * @param roleName the role name
+	 */
 	@Override
 	public void deleteRole(String roleName) {
 	    // 1. Validar que no se intente borrar un rol predeterminado

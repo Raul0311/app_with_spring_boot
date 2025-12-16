@@ -8,12 +8,15 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+/**
+ * The Interface RoleRepository.
+ */
 public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
 	
 	/**
 	 * Find role by name.
 	 *
-	 * @param userToken the user token
+	 * @param name the name
 	 * @return if the userToken is validate
 	 */
 	@Query(value="SELECT * FROM roles WHERE role_name = ?1", nativeQuery = true)
@@ -29,9 +32,20 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
     List<Long> findIdsByRoleNames(@Param("roleNames") List<String> roleNames);
 	
 	/**
-     * Delete role by its name.
-     */
+	 * Delete role by its name.
+	 *
+	 * @param roleName the role name
+	 */
     @Modifying
     @Query("DELETE FROM RoleEntity r WHERE r.roleName = :roleName")
     void deleteByRoleName(@Param("roleName") String roleName);
+    
+    /**
+     * Find role by name.
+     *
+     * @param roleNames the role names
+     * @return the list
+     */
+    @Query("SELECT r FROM RoleEntity r WHERE r.roleName IN :roleNames")
+    List<RoleEntity> findByRoleNameIn(@Param("roleNames") List<String> roleNames);
 }

@@ -1,4 +1,9 @@
 package com.example.demo.domain.dto;
 
-// Usamos record para encapsular los datos de entrada
+/**
+ * The Record RoleCreationDto.
+ *
+ * @param name the name
+ * @param description the description
+ */
 public record RoleCreationDto(String name, String description) {}

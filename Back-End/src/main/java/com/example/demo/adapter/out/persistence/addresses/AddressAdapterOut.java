@@ -19,40 +19,93 @@ import jakarta.transaction.Transactional;
 @Service
 public class AddressAdapterOut implements AddressPortOut {
 	
+	/**
+	 * The Class AddressSaveException.
+	 */
 	@SuppressWarnings("serial")
     public class AddressSaveException extends RuntimeException {
+        
+        /**
+         * Instantiates a new address save exception.
+         *
+         * @param message the message
+         */
         public AddressSaveException(String message) {
             super(message);
         }
     }
 
+    /**
+     * The Class AddressUpdateException.
+     */
     @SuppressWarnings("serial")
     public class AddressUpdateException extends RuntimeException {
+        
+        /**
+         * Instantiates a new address update exception.
+         *
+         * @param message the message
+         */
         public AddressUpdateException(String message) {
             super(message);
         }
     }
 
+    /**
+     * The Class AddressDeleteException.
+     */
     @SuppressWarnings("serial")
     public class AddressDeleteException extends RuntimeException {
+        
+        /**
+         * Instantiates a new address delete exception.
+         *
+         * @param message the message
+         */
         public AddressDeleteException(String message) {
             super(message);
         }
     }
     
+    /**
+     * The Class AddressDefaultChangeException.
+     */
     @SuppressWarnings("serial")
     public class AddressDefaultChangeException extends RuntimeException {
+        
+        /**
+         * Instantiates a new address default change exception.
+         *
+         * @param message the message
+         */
         public AddressDefaultChangeException(String message) {
             super(message);
         }
     }
 
+	/** The address repository. */
 	private final AddressRepository addressRepository;
+	
+	/** The address mapper. */
+	private final AddressMapper addressMapper;
 
-    public AddressAdapterOut(AddressRepository addressRepository) {
+    /**
+     * Instantiates a new address adapter out.
+     *
+     * @param addressRepository the address repository
+     * @param addressMapper the address mapper
+     */
+    public AddressAdapterOut(AddressRepository addressRepository, AddressMapper addressMapper) {
         this.addressRepository = addressRepository;
+        this.addressMapper = addressMapper;
     }
 
+    /**
+     * Load.
+     *
+     * @param userId the user id
+     * @return the list
+     */
     @Override
     public List<Address> load(Long userId) {
         List<AddressEntity> addressesEntity = addressRepository.findByUserId(userId);
@@ -60,12 +113,18 @@ public class AddressAdapterOut implements AddressPortOut {
         List<Address> addresses = new ArrayList<>();
 
         for (AddressEntity entity : addressesEntity) {
-            addresses.add(AddressMapper.toDomain(entity));
+            addresses.add(addressMapper.toDomain(entity));
         }
         
         return addresses;
     }
 
+    /**
+     * Save.
+     *
+     * @param address the address
+     * @return the address
+     */
     @Override
     @Transactional
     public Address save(Address address) {
@@ -78,12 +137,18 @@ public class AddressAdapterOut implements AddressPortOut {
             // Desmarcar la anterior predeterminada del mismo tipo
             addressRepository.clearDefault(address.getUserId(), address.getType().name());
         }
-        Address newAddress = AddressMapper.toDomain(addressRepository.save(AddressMapper.toEntity(address)));
+        Address newAddress = addressMapper.toDomain(addressRepository.save(addressMapper.toEntity(address)));
         if(newAddress == null) throw new AddressSaveException("No se pudo guardar la nueva dirección.");
         
         return newAddress;
     }
 
+    /**
+     * Update.
+     *
+     * @param address the address
+     * @return the address
+     */
     @Override
     @Transactional
     public Address update(Address address) {
@@ -96,12 +161,18 @@ public class AddressAdapterOut implements AddressPortOut {
             addressRepository.clearDefault(address.getUserId(), address.getType().name());
         }
         
-        Address updatedAddress = AddressMapper.toDomain(addressRepository.save(AddressMapper.toEntity(address)));
+        Address updatedAddress = addressMapper.toDomain(addressRepository.save(addressMapper.toEntity(address)));
         if(updatedAddress == null) throw new AddressUpdateException("No se pudo actualizar la dirección.");
         
         return updatedAddress;
     }
 
+    /**
+     * Delete.
+     *
+     * @param userId the user id
+     * @param addressId the address id
+     */
     @Override
     @Transactional
     public void delete(Long userId, Long addressId) {
@@ -119,6 +190,13 @@ public class AddressAdapterOut implements AddressPortOut {
     	}
     }
     
+    /**
+     * Sets the default.
+     *
+     * @param userId the user id
+     * @param addressId the address id
+     * @param type the type
+     */
     @Override
     @Transactional
     public void setDefault(Long userId, Long addressId, AddressType type) {

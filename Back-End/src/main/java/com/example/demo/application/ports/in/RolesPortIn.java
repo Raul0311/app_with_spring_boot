@@ -27,10 +27,11 @@ public interface RolesPortIn {
     List<RoleDto> getAllRoles();
     
     /**
-	 * UpdateUserRoles.
-	 *
-	 * @param RoleUpdateCommand the role update command
-	 */
+     * UpdateUserRoles.
+     *
+     * @param authenticatedUserId the authenticated user id
+     * @param command the command
+     */
     void updateUserRoles(Long authenticatedUserId, RoleUpdateCommand command);
     
     /**

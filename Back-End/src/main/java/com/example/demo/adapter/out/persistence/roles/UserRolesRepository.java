@@ -8,6 +8,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * The Interface UserRolesRepository.
+ */
 // 🎯 CAMBIO APLICADO AQUÍ: Reemplazar Long por UserRoleId
 public interface UserRolesRepository extends JpaRepository<UserRolesEntity, UserRoleId> {
 	
@@ -15,6 +18,8 @@ public interface UserRolesRepository extends JpaRepository<UserRolesEntity, User
 	 * Delete role by user id.
 	 *
 	 * @param userId the user id
+	 * @param roleIds the role ids
+	 * @return the int
 	 */
 	@Modifying
     @Transactional

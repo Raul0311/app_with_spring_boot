@@ -25,16 +25,18 @@ public interface RolesPortOut {
     List<RoleDto> loadAllRoles();
     
     /**
-	 * LoadUserWithRoles.
-	 *
-	 * @return the user with roles
-	 */
+     * LoadUserWithRoles.
+     *
+     * @param userId the user id
+     * @return the user with roles
+     */
     UserWithRolesDto loadUserWithRoles(Long userId);
     
 	/**
 	 * RemoveAllRolesFromUser.
 	 *
 	 * @param userId the user id
+	 * @param roleNames the role names
 	 */
 	void removeSpecificRolesFromUser(Long userId, List<String> roleNames);
 	
@@ -57,7 +59,7 @@ public interface RolesPortOut {
     /**
      * Persists a new role entity.
      *
-     * @param roleName the final
+     * @param finalRoleName the final role name
      * @param description the description
      */
     void saveRole(String finalRoleName, String description);
