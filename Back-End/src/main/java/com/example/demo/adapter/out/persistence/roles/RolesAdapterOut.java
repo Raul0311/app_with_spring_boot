@@ -1,7 +1,6 @@
 package com.example.demo.adapter.out.persistence.roles;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,43 +18,43 @@ public class RolesAdapterOut implements RolesPortOut {
 	private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserRolesRepository userRolesRepository;
+    private final RoleMapper roleMapper;
 
-    public RolesAdapterOut(UserRepository userRepository, RoleRepository roleRepository, UserRolesRepository userRolesRepository) {
+    public RolesAdapterOut(UserRepository userRepository, RoleRepository roleRepository, UserRolesRepository userRolesRepository, 
+    		RoleMapper roleMapper) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.userRolesRepository = userRolesRepository;
+        this.roleMapper = roleMapper;
     }
     
     private UserWithRolesDto mapUserEntityToDto(UserEntity user) {
-        UserWithRolesDto dto = new UserWithRolesDto(user.getId(), user.getUsername(), null); 
-        
         List<RoleDto> roleDtos = user.getRoles().stream()
-            .map(r -> new RoleDto(r.getRoleName(), r.getDescription()))
-            .collect(Collectors.toList());
+                .map(roleMapper::toDto)
+                .toList();
         
+        UserWithRolesDto dto = new UserWithRolesDto(user.getId(), user.getUsername(), null); 
         dto.setRoles(roleDtos);
         return dto;
     }
 
     @Override
     public List<UserWithRolesDto> loadAllUsersWithRoles() {
-    	List<UserEntity> users = userRepository.findAllWithRoles(); 
-        return users.stream().map(this::mapUserEntityToDto).collect(Collectors.toList());
+    	return userRepository.findAllWithRoles().stream()
+                .map(this::mapUserEntityToDto)
+                .toList();
     }
     
     @Override
     public UserWithRolesDto loadUserWithRoles(Long userId) {
-        UserEntity user = userRepository.findByIdWithRoles(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-        return mapUserEntityToDto(user);
+    	return userRepository.findByIdWithRoles(userId)
+                .map(this::mapUserEntityToDto)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
     
     @Override
     public List<RoleDto> loadAllRoles() {
-        // Consulta simple a la tabla 'roles'
-        return roleRepository.findAll().stream()
-            .map(r -> new RoleDto(r.getRoleName(), r.getDescription()))
-            .collect(Collectors.toList());
+    	return roleMapper.toDtoList(roleRepository.findAll());
     }
 
     @Override
@@ -71,23 +70,15 @@ public class RolesAdapterOut implements RolesPortOut {
     @Override
     @Transactional
     public void assignRolesToUser(Long userId, List<String> roleNames) {
-    	// 1. Cargar la entidad UserEntity (Una sola vez)
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found")); // Usa la excepción que corresponda
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        for (String roleName : roleNames) {
-            Long roleId = findRoleIdByName(roleName);
-            if (roleId != null) {
-                // 2. Cargar la entidad RoleEntity
-                RoleEntity role = roleRepository.findById(roleId)
-                        .orElseThrow(() -> new RuntimeException("Role not found")); // Usa la excepción que corresponda
-
-                // 3. Crear UserRolesEntity y ASIGNAR LAS ENTIDADES ASOCIADAS
-                UserRolesEntity newRole = new UserRolesEntity(user, role); 
-                
+        roleNames.forEach(name -> 
+            roleRepository.findByName(name).ifPresent(role -> {
+                UserRolesEntity newRole = new UserRolesEntity(user, role);
                 userRolesRepository.save(newRole);
-            }
-        }
+            })
+        );
     }
 
     @Override

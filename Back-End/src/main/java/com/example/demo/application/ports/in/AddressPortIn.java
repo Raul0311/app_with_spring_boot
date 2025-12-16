@@ -13,7 +13,7 @@ public interface AddressPortIn {
 	/**
 	 * Load.
 	 *
-	 * @param userId the user id
+	 * @param id the id
 	 * @return the addresses of the user
 	 */
 	List<Address> load(Long id);
@@ -22,6 +22,7 @@ public interface AddressPortIn {
 	 * Save.
 	 *
 	 * @param address the address
+	 * @return the address
 	 */
 	Address save(Address address);
 
@@ -29,6 +30,7 @@ public interface AddressPortIn {
 	 * Update.
 	 *
 	 * @param address the address
+	 * @return the address
 	 */
 	Address update(Address address);
 

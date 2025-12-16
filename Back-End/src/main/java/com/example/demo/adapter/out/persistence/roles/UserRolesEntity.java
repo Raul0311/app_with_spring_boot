@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * The Class UserRolesEntity.
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -16,28 +19,38 @@ public class UserRolesEntity {
 
     // --- Clave Compuesta ---
     
+    /** The user id. */
     @Id // PRIMER COMPONENTE DE LA CLAVE
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    /** The role id. */
     @Id // SEGUNDO COMPONENTE DE LA CLAVE
     @Column(name = "role_id", nullable = false)
     private Long roleId;
     
     // --- Relaciones ---
     
+    /** The user. */
     // Mapea la clave userId a la entidad User
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId") // Mapea este ManyToOne al campo 'userId' de la clave
     @JoinColumn(name = "user_id")
     private UserEntity user;
     
+    /** The role. */
     // Mapea la clave roleId a la entidad Role
     @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("roleId") // Mapea este ManyToOne al campo 'roleId' de la clave
     @JoinColumn(name = "role_id")
     private RoleEntity role;
     
+    /**
+     * Instantiates a new user roles entity.
+     *
+     * @param user the user
+     * @param role the role
+     */
     public UserRolesEntity(UserEntity user, RoleEntity role) {
         // 1. Asignar las entidades asociadas (NECESARIO para @MapsId)
         this.user = user;

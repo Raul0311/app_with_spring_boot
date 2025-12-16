@@ -3,63 +3,62 @@ package com.example.demo.adapter.out.persistence;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.example.demo.domain.User;
+
+/**
+ * The Interface UserRepository.
+ */
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
+	
 	/**
-	 * Login and Register.
+	 * Login and register.
 	 *
-	 * @param username       the username
-	 * @param passw          the password
-	 * @param name           the user's first name
-	 * @param lastname1      the user's first last name
-	 * @param lastname2      the user's second last name
-	 * @param city           the user's city
-	 * @param country        the user's country
-	 * @param address        the user's street address
-	 * @param numberAddress  the user's street number
-	 * @param apartment      the user's apartment (optional)
-	 * @param zipCode        the user's postal code
-	 * @param phone          the user's phone number
-	 * @param email          the user's email
-	 * @param session_id     the current session identifier
-	 * @param register       flag that indicates whether the request is a registration action
-	 * @param login          flag that indicates whether the user wants to log in
-	 * @return               the UserDTO containing the user data, token and roles
+	 * @param user the user
+	 * @param sessionId the session id
+	 * @param register the register
+	 * @param login the login
+	 * @return the string
 	 */
-
-	// @Query(value="SELECT *, now(3) AS userToken FROM users u WHERE u.username = ?1 AND u.password = ?2", nativeQuery = true)
-	@Query(value="CALL loginAndRegister(?1, ?2, ?3, ?4, ?5, ?6, ?7,"
-			+ " ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16)", nativeQuery = true)
-	String loginAndRegister(String username, String passw, String name, String lastname1, 
-			String lastname2, String city, String country, String address, String numberAddress, String apartment, 
-			String zipCode, String phone, String email, String session_id, boolean register, boolean login);
+	@Query(value = "CALL loginAndRegister("
+            + ":#{#user.username}, :#{#user.passw}, :#{#user.name}, :#{#user.lastname1}, "
+            + ":#{#user.lastname2}, :#{#user.city}, :#{#user.country}, :#{#user.street}, "
+            + ":#{#user.numberAddress}, :#{#user.apartment}, :#{#user.zipCode}, :#{#user.phone}, "
+            + ":#{#user.email}, :sessionId, :register, :login)", nativeQuery = true)
+    String loginAndRegister(
+            @Param("user") User user, 
+            @Param("sessionId") String sessionId, 
+            @Param("register") boolean register, 
+            @Param("login") boolean login);
 	
 	/**
 	 * Find by user.
 	 *
 	 * @param username       the username
 	 * @param passw          the password
-	 * @param session_id     the current session identifier
+	 * @param sessionId      the current session identifier
 	 * @return               the JSON containing the user id, token and roles
 	 */
 	@Query(value="CALL login(?1, ?2, ?3)", nativeQuery = true)
-	String login(String username, String passw, String session_id);
+	String login(String username, String passw, String sessionId);
 	
 	/**
 	 * Delete userToken.
 	 *
-	 * @param session_id the session id
+	 * @param sessionId the session id
 	 */
 	@Query(value="DELETE FROM user_tokens AS u WHERE u.session_id = ?1", nativeQuery = true)
 	@Modifying
-	void deleteUserToken(String session_id);
+	void deleteUserToken(String sessionId);
 	
 	/**
 	 * Send email.
 	 *
 	 * @param email the email
+	 * @return the string
 	 */
 	@Query(value="CALL forgotPassword(?1)", nativeQuery = true)
 	String forgotPassword(String email);
@@ -68,6 +67,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 	 * Reset password.
 	 *
 	 * @param newPass the new password
+	 * @param token the token
+	 * @return the integer
 	 */
 	@Query(value="CALL resetPassword(?1, ?2)", nativeQuery = true)
 	Integer resetPassword(String newPass, String token);

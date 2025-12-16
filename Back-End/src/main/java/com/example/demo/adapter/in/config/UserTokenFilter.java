@@ -1,6 +1,7 @@
 package com.example.demo.adapter.in.config;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,14 +16,32 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * The Class UserTokenFilter.
+ */
 public class UserTokenFilter extends OncePerRequestFilter {
 
+    /** The user port out. */
     private final UserPortOut userPortOut;
 
+    /**
+     * Instantiates a new user token filter.
+     *
+     * @param userPortOut the user port out
+     */
     public UserTokenFilter(UserPortOut userPortOut) {
         this.userPortOut = userPortOut;
     }
 
+    /**
+     * Do filter internal.
+     *
+     * @param request the request
+     * @param response the response
+     * @param filterChain the filter chain
+     * @throws ServletException the servlet exception
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
@@ -53,7 +72,7 @@ public class UserTokenFilter extends OncePerRequestFilter {
                 // Como ya validamos, podemos considerar el usuario autenticado
                 // Asumimos que no necesitamos cargar detalles específicos del usuario (roles/authorities) para este ejemplo simple.
                 UsernamePasswordAuthenticationToken authentication = 
-                    new UsernamePasswordAuthenticationToken(userId, null, null); // Principal es el userId
+                    new UsernamePasswordAuthenticationToken(userId, Collections.emptyList(), Collections.emptyList());
 
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 

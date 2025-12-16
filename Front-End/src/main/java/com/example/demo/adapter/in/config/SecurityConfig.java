@@ -15,29 +15,57 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 
+/**
+ * The Class SecurityConfig.
+ */
 @Configuration
 public class SecurityConfig {
 
+    /** The custom auth provider. */
     private final CustomAuthenticationProvider customAuthProvider;
 
+    /**
+     * Instantiates a new security config.
+     *
+     * @param customAuthProvider the custom auth provider
+     */
     public SecurityConfig(CustomAuthenticationProvider customAuthProvider) {
         this.customAuthProvider = customAuthProvider;
     }
     
+    /**
+     * Authentication manager.
+     *
+     * @param authConfig the auth config
+     * @return the authentication manager
+     */
     // AuthenticationManager personalizado
     @Bean
-    AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-        return authentication -> customAuthProvider.authenticate(authentication);
+    AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) {
+        return customAuthProvider::authenticate;
     }
 
+    /**
+     * Http session event publisher.
+     *
+     * @param userService the user service
+     * @return the http session event publisher
+     */
     @Bean
     HttpSessionEventPublisher httpSessionEventPublisher(UserAdapterOut userService) {
         return new CustomHttpSessionEventPublisher(userService);
     }
 
+    /**
+     * Security filter chain.
+     *
+     * @param http the http
+     * @param failureHandler the failure handler
+     * @return the security filter chain
+     */
     // Configuración de seguridad
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, CustomAuthFailureHandler failureHandler) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, CustomAuthFailureHandler failureHandler) {
         http
         	.authorizeHttpRequests(auth -> auth
     			.requestMatchers("/private/**").hasAnyRole("USER", "ADMIN")

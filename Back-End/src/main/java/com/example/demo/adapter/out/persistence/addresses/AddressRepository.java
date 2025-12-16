@@ -8,6 +8,9 @@ import org.springframework.data.jpa.repository.Query;
 
 import jakarta.transaction.Transactional;
 
+/**
+ * The Interface AddressRepository.
+ */
 public interface AddressRepository extends JpaRepository<AddressEntity, Long> {
 	
 	/**
@@ -35,6 +38,7 @@ public interface AddressRepository extends JpaRepository<AddressEntity, Long> {
 	 * @param addressId the address id
 	 * @param userId the user id
 	 * @param type the type
+	 * @return the integer
 	 */
 	@Modifying
     @Transactional
@@ -46,6 +50,7 @@ public interface AddressRepository extends JpaRepository<AddressEntity, Long> {
 	 *
 	 * @param userId the user id
 	 * @param type the type
+	 * @return the integer
 	 */
 	@Modifying
     @Transactional

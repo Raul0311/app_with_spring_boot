@@ -15,20 +15,39 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.example.demo.application.ports.out.UserPortOut;
 
+/**
+ * The Class SecurityConfig.
+ */
 @Configuration
 public class SecurityConfig {
 	
+	/** The user port out. */
 	private final UserPortOut userPortOut;
 	
+	/**
+	 * Instantiates a new security config.
+	 *
+	 * @param userPortOut the user port out
+	 */
 	public SecurityConfig(UserPortOut userPortOut) {
         this.userPortOut = userPortOut;
     }
 	
+	/**
+	 * User token filter.
+	 *
+	 * @return the user token filter
+	 */
 	@Bean
     public UserTokenFilter userTokenFilter() {
         return new UserTokenFilter(userPortOut);
     }
 	
+	/**
+	 * Cors configuration source.
+	 *
+	 * @return the cors configuration source
+	 */
 	@Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -51,9 +70,16 @@ public class SecurityConfig {
         return source;
     }
 
+    /**
+     * Security filter chain.
+     *
+     * @param http the http
+     * @return the security filter chain
+     * @throws Exception the exception
+     */
     // Configuración de seguridad
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
     	http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
         
         http

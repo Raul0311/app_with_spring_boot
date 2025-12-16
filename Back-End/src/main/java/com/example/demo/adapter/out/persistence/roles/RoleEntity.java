@@ -10,6 +10,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * The Class RoleEntity.
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -17,13 +20,16 @@ import lombok.NoArgsConstructor;
 @Table(name = "roles")
 public class RoleEntity {
     
+    /** The id. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
+    /** The role name. */
     @Column(name = "role_name", unique = true, nullable = false)
     private String roleName;
 
+    /** The description. */
     @Column(name = "description")
     private String description;
 }

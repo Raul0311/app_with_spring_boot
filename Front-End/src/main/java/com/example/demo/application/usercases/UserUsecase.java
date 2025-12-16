@@ -9,9 +9,22 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.example.demo.application.ports.in.UserPortIn;
 
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * The Class UserUsecase.
+ */
+@Slf4j
 @Service
 public class UserUsecase implements UserPortIn {
 
+	/**
+	 * Load.
+	 *
+	 * @param auth the auth
+	 * @return the string
+	 * @throws BadCredentialsException the bad credentials exception
+	 */
 	@Override
 	public String load(Authentication auth)throws BadCredentialsException {
 		try {
@@ -38,9 +51,9 @@ public class UserUsecase implements UserPortIn {
 	        return "auth";
 		}
 		catch(Exception e) {
-			System.out.println(e.getMessage());
+			log.error("Error al cargar la ruta de autenticación: {}", e.getMessage(), e);
+			
+			return "error";
 		}
-        
-		return null;
 	}
 }

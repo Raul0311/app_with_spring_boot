@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -21,6 +21,7 @@ import com.example.demo.domain.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * The Class CustomAuthenticationProvider.
@@ -28,74 +29,43 @@ import jakarta.servlet.http.HttpServletRequest;
 @Component
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 	
-	@SuppressWarnings("serial")
-	public static class AccountCreatedException extends AuthenticationException {
-        public AccountCreatedException(String msg) {
-            super(msg);
-        }
-    }
+	/** The Constant USER_EXISTS. */
+	private static final String USER_EXISTS = "El usuario ya existe";
     
-    @SuppressWarnings("serial")
-    public static class UserExistsException extends AuthenticationException {
-        public UserExistsException(String msg) {
-            super(msg);
-        }
-    }
+    /** The Constant USER_NOT_EXISTS. */
+    private static final String USER_NOT_EXISTS = "Credenciales inválidas";
     
-    @SuppressWarnings("serial")
-    public static class LinkSentSuccessfully extends AuthenticationException {
-        public LinkSentSuccessfully(String msg) {
-            super(msg);
-        }
-    }
+    /** The Constant ACCOUNT_CREATED. */
+    private static final String ACCOUNT_CREATED = "Se ha creado la cuenta correctamente";
     
-    @SuppressWarnings("serial")
-    public static class EmailDoesNotExist extends AuthenticationException {
-        public EmailDoesNotExist(String msg) {
-            super(msg);
-        }
-    }
+    /** The Constant LINK_SENT. */
+    private static final String LINK_SENT = "Te hemos enviado un enlace para restablecer tu contraseña.";
     
-    @SuppressWarnings("serial")
-    public static class ResetPasswordSuccessfully extends AuthenticationException {
-        public ResetPasswordSuccessfully(String msg) {
-            super(msg);
-        }
-    }
+    /** The Constant EMAIL_NOT_EXISTS. */
+    private static final String EMAIL_NOT_EXISTS = "No existe ninguna cuenta con ese correo.";
     
-    @SuppressWarnings("serial")
-    public static class PasswordDoesNotReset extends AuthenticationException {
-        public PasswordDoesNotReset(String msg) {
-            super(msg);
-        }
-    }
+    /** The Constant RESET_PASSWORD. */
+    private static final String RESET_PASSWORD = "La contraseña se ha cambiado correctamente";
     
-	User user;
-
-    /** The authorities. */
-    private List<GrantedAuthority> authorities;
+    /** The Constant PASSWORD_NOT_RESET. */
+    private static final String PASSWORD_NOT_RESET = "La contraseña no se ha podido cambiar, intentálo de nuevo más tarde.";
     
-    @Autowired
+    /** The user port out. */
     private UserPortOut userPortOut;
     
-    @Autowired
+    /** The email port out. */
     private EmailPortOut emailPortOut;
     
-    private boolean register;
-    
-    private boolean login;
-    
-    private boolean forgotPassword;
-    
-    private boolean resetPassword;
-
-    private final String USER_EXISTS = "El usuario ya existe";
-    private final String USER_NOT_EXISTS = "Credenciales inválidas";
-    private final String ACCOUNT_CREATED = "Se ha creado la cuenta correctamente";
-    private final String LINK_SENT = "Te hemos enviado un enlace para restablecer tu contraseña.";
-    private final String EMAIL_NOT_EXISTS = "No existe ninguna cuenta con ese correo.";
-    private final String RESET_PASSWORD = "La contraseña se ha cambiado correctamente";
-    private final String PASSWORD_NOT_RESET = "La contraseña no se ha podido cambiar, intentálo de nuevo más tarde.";
+    /**
+     * Instantiates a new custom authentication provider.
+     *
+     * @param userPortOut the user port out
+     * @param emailPortOut the email port out
+     */
+    public CustomAuthenticationProvider(UserPortOut userPortOut, EmailPortOut emailPortOut) {
+    	this.userPortOut = userPortOut;
+    	this.emailPortOut = emailPortOut;
+    }
     
     /**
      * Authenticate.
@@ -106,116 +76,113 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
      */
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        clearCredentials();
-        
         ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+        HttpServletRequest request = attr.getRequest();
         jakarta.servlet.http.HttpSession session = attr.getRequest().getSession(true);
         
-        HttpServletRequest request = attr.getRequest();
-        String actionRegister = request.getParameter("actionRegister");
-        String actionLogin = request.getParameter("actionLogin");
-        String actionForgotPassword = request.getParameter("actionForgotPassword");
-        String actionResetPassword = request.getParameter("actionResetPassword");
+        boolean isRegister = "register".equals(request.getParameter("actionRegister"));
+        boolean isLogin = "login".equals(request.getParameter("actionLogin"));
         
-        register = "register".equals(actionRegister);
-        login = "login".equals(actionLogin);
-        forgotPassword = "forgot-password".equals(actionForgotPassword);
-        resetPassword = "reset-password".equals(actionResetPassword);
+        if ("forgot-password".equals(request.getParameter("actionForgotPassword"))) {
+            return handleForgotPassword(request);
+        }
 
-        if (register && login) {
-        	if(login(authentication, request, session)) {
-	            return new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassw(), authorities);
-        	} else {
-        		throw new UserExistsException(USER_EXISTS);
-        	}
-        } else if(register && !login) {
-        	if(login(authentication, request, session)) {
-        		throw new AccountCreatedException(ACCOUNT_CREATED);
-        	} else {
-        		throw new UserExistsException(USER_EXISTS);
-        	}
-        } else if(!register && login) {
-        	if(login(authentication, request, session)) {
-	            return new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassw(), authorities);
-        	} else {
-        		throw new BadCredentialsException(USER_NOT_EXISTS);
-        	}
-        } else if(forgotPassword) {
-        	if(forgotPassword(request, session)) {
-        		throw new LinkSentSuccessfully(LINK_SENT);
-        	} else {
-        		throw new EmailDoesNotExist(EMAIL_NOT_EXISTS);
-        	}
-        } else if(resetPassword) {
-    		if(resetPassword(request)) {
-    			throw new ResetPasswordSuccessfully(RESET_PASSWORD);
-        	} else {
-        		throw new PasswordDoesNotReset(PASSWORD_NOT_RESET);
-        	}
+        if ("reset-password".equals(request.getParameter("actionResetPassword"))) {
+            return handleResetPassword(request);
         }
         
-        return null;
+        return processAuthentication(authentication, request, session, isRegister, isLogin);
     }
     
-    public boolean forgotPassword(HttpServletRequest request, jakarta.servlet.http.HttpSession session) {
-    	String email = request.getParameter("email");
-    	String token = getUserPortOut().forgotPassword(email);
-    	
-    	if(token != null) {
-    		emailPortOut.sendResetPasswordEmail(email, token);
-    		return true;
-    	} else {
-    		return false;
-    	}
-    }
-    
-    public boolean resetPassword(HttpServletRequest request) {
-    	Integer status = getUserPortOut().resetPassword(request.getParameter("newPass"), request.getParameter("token"));
-    	if(status == 1) {
-    		return true;
-    	} else {
-    		return false;
-    	}
-    }
-    
-    public boolean ifLogin(jakarta.servlet.http.HttpSession session) {
-    	String userJson = getUserPortOut().load(user, session.getId(), register, login);
-    	
-    	if (userJson == null) {
-            return false;
+    /**
+     * Process authentication.
+     *
+     * @param auth the auth
+     * @param req the req
+     * @param session the session
+     * @param reg the reg
+     * @param log the log
+     * @return the authentication
+     */
+    private Authentication processAuthentication(Authentication auth, HttpServletRequest req, HttpSession session, boolean reg, boolean log) {
+        // Validar null para evitar NullPointerException (Aviso SonarQube)
+        Object credentials = auth.getCredentials();
+        String password = (credentials != null) ? credentials.toString() : "";
+
+        User user = new User();
+        user.setUsername(auth.getName());
+        user.setPassw(password);
+
+        if (reg) {
+            fillRegistrationData(user, req);
         }
-    	try {
+
+        // Caso: Registro sin Login inmediato
+        if (reg && !log) {
+            if (userPortOut.load(user, session.getId(), true, false) != null) {
+                throw new AccountCreatedException(ACCOUNT_CREATED);
+            }
+            throw new UserExistsException(USER_EXISTS);
+        }
+
+        // Caso: Login (puro o tras registro)
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        if (attemptLogin(user, session, reg, log, authorities)) {
+            return new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassw(), authorities);
+        }
+
+        throw new BadCredentialsException(reg ? USER_EXISTS : USER_NOT_EXISTS);
+    }
+    
+    /**
+     * Attempt login.
+     *
+     * @param user the user
+     * @param session the session
+     * @param reg the reg
+     * @param log the log
+     * @param authorities the authorities
+     * @return true, if successful
+     */
+    private boolean attemptLogin(User user, HttpSession session, boolean reg, boolean log, List<GrantedAuthority> authorities) {
+        String userJson = userPortOut.load(user, session.getId(), reg, log);
+        if (userJson == null) return false;
+
+        try {
             ObjectMapper mapper = new ObjectMapper();
-            user = mapper.readValue(userJson, User.class);
+            User data = mapper.readValue(userJson, User.class);
+            
+            // Actualizar el objeto user con los datos del JSON
+            user.setId(data.getId());
+            user.setUserToken(data.getUserToken());
+            
+            session.setAttribute("userToken", data.getUserToken());
+            session.setAttribute("userRoles", data.getRolesStr());
+
+            if (data.getRolesStr() != null && !data.getRolesStr().isEmpty()) {
+                Arrays.stream(data.getRolesStr().split("\\|"))
+                    .forEach(role -> authorities.add(new SimpleGrantedAuthority(role.toUpperCase())));
+            }
+            return true;
         } catch (Exception e) {
-            throw new RuntimeException("Error parsing user JSON", e);
+            // Excepción específica (Aviso SonarQube)
+            throw new DatabaseOperationException("Error procesando JSON de usuario", e);
         }
-        System.out.println(user.getRolesStr());
-        // Guardar en sesión
-        session.setAttribute("userToken", user.getUserToken());
-        session.setAttribute("userId", user.getId());
-        session.setAttribute("userRoles", user.getRolesStr());
-        
-        List<String> roles = Arrays.asList(user.getRolesStr().split("\\|"));
-        user.setRoles(roles);
-        
-        // Agregar roles para que Spring Security lo reconozca
-        if (authorities == null) authorities = new ArrayList<>();
-        
-        for (String r : user.getRoles()) {
-        	authorities.add(() -> r.toUpperCase());
-        }
-    
-        return true;
     }
-    
-    public void ifRegister(HttpServletRequest request) {
-    	user.setName(request.getParameter("name"));
+
+    /**
+     * Fill registration data.
+     *
+     * @param user the user
+     * @param request the request
+     */
+    private void fillRegistrationData(User user, HttpServletRequest request) {
+        user.setName(request.getParameter("name"));
         user.setLastname1(request.getParameter("lastname1"));
         user.setLastname2(request.getParameter("lastname2"));
+        user.setStreet(request.getParameter("street"));
         user.setCity(request.getParameter("city"));
         user.setCountry(request.getParameter("country"));
-        user.setAddress(request.getParameter("address"));
         user.setNumberAddress(request.getParameter("numberAddress"));
         user.setApartment(request.getParameter("apartment"));
         user.setZipCode(request.getParameter("zipCode"));
@@ -224,45 +191,34 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     }
 
     /**
-     * Login.
+     * Handle forgot password.
      *
-     * @param authentication the authentication
-     * @return true, if successful
+     * @param request the request
+     * @return the authentication
      */
-    public boolean login(Authentication authentication, HttpServletRequest request, jakarta.servlet.http.HttpSession session) {
-    	user = new User();
-        
-    	user.setUsername(authentication.getName());
-        user.setPassw(authentication.getCredentials().toString());
-        
-        if(register && login) {
-        	ifRegister(request);
-        	
-        	return ifLogin(session);
-        } else if(register && !login) {
-        	ifRegister(request);
-        	
-        	String userJson = getUserPortOut().load(user, session.getId(), register, login);
-        	
-        	if(userJson == null) {
-        		return false;
-        	} else {
-        		return true;
-        	}
-        } else {
-        	
-        	return ifLogin(session);
+    // Métodos de apoyo para reducir complejidad cognitiva
+    private Authentication handleForgotPassword(HttpServletRequest request) {
+        String email = request.getParameter("email");
+        String token = userPortOut.forgotPassword(email);
+        if (token != null) {
+            emailPortOut.sendResetPasswordEmail(email, token);
+            throw new LinkSentSuccessfully(LINK_SENT);
         }
+        throw new EmailDoesNotExist(EMAIL_NOT_EXISTS);
     }
 
     /**
-     * Clear credentials.
+     * Handle reset password.
+     *
+     * @param request the request
+     * @return the authentication
      */
-    public void clearCredentials() {
-        if (authorities == null) {
-            authorities = new ArrayList<>();
+    private Authentication handleResetPassword(HttpServletRequest request) {
+        Integer status = userPortOut.resetPassword(request.getParameter("newPass"), request.getParameter("token"));
+        if (status != null && status == 1) {
+            throw new ResetPasswordSuccessfully(RESET_PASSWORD);
         }
-        authorities.clear();
+        throw new PasswordDoesNotReset(PASSWORD_NOT_RESET);
     }
 
     /**
@@ -276,11 +232,134 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         return authentication.equals(UsernamePasswordAuthenticationToken.class);
     }
 
+	/**
+	 * Gets the user port out.
+	 *
+	 * @return the user port out
+	 */
 	public UserPortOut getUserPortOut() {
 		return userPortOut;
 	}
 
+	/**
+	 * Sets the user port out.
+	 *
+	 * @param userPortOut the new user port out
+	 */
 	public void setUserPortOut(UserPortOut userPortOut) {
 		this.userPortOut = userPortOut;
+	}
+	
+	/**
+	 * The Class AccountCreatedException.
+	 */
+	@SuppressWarnings("serial")
+	public static class AccountCreatedException extends AuthenticationException {
+        
+        /**
+         * Instantiates a new account created exception.
+         *
+         * @param msg the msg
+         */
+        public AccountCreatedException(String msg) {
+            super(msg);
+        }
+    }
+    
+    /**
+     * The Class UserExistsException.
+     */
+    @SuppressWarnings("serial")
+    public static class UserExistsException extends AuthenticationException {
+        
+        /**
+         * Instantiates a new user exists exception.
+         *
+         * @param msg the msg
+         */
+        public UserExistsException(String msg) {
+            super(msg);
+        }
+    }
+    
+    /**
+     * The Class LinkSentSuccessfully.
+     */
+    @SuppressWarnings("serial")
+    public static class LinkSentSuccessfully extends AuthenticationException {
+        
+        /**
+         * Instantiates a new link sent successfully.
+         *
+         * @param msg the msg
+         */
+        public LinkSentSuccessfully(String msg) {
+            super(msg);
+        }
+    }
+    
+    /**
+     * The Class EmailDoesNotExist.
+     */
+    @SuppressWarnings("serial")
+    public static class EmailDoesNotExist extends AuthenticationException {
+        
+        /**
+         * Instantiates a new email does not exist.
+         *
+         * @param msg the msg
+         */
+        public EmailDoesNotExist(String msg) {
+            super(msg);
+        }
+    }
+    
+    /**
+     * The Class ResetPasswordSuccessfully.
+     */
+    @SuppressWarnings("serial")
+    public static class ResetPasswordSuccessfully extends AuthenticationException {
+        
+        /**
+         * Instantiates a new reset password successfully.
+         *
+         * @param msg the msg
+         */
+        public ResetPasswordSuccessfully(String msg) {
+            super(msg);
+        }
+    }
+    
+    /**
+     * The Class PasswordDoesNotReset.
+     */
+    @SuppressWarnings("serial")
+    public static class PasswordDoesNotReset extends AuthenticationException {
+        
+        /**
+         * Instantiates a new password does not reset.
+         *
+         * @param msg the msg
+         */
+        public PasswordDoesNotReset(String msg) {
+            super(msg);
+        }
+    }
+    
+    /**
+     * The Class DatabaseOperationException.
+     */
+    @SuppressWarnings("serial")
+	public class DatabaseOperationException extends RuntimeException {
+	    
+    	/**
+    	 * Instantiates a new database operation exception.
+    	 *
+    	 * @param message the message
+    	 * @param cause the cause
+    	 */
+    	public DatabaseOperationException(String message, Throwable cause) {
+	        super(message, cause);
+	    }
 	}
 }

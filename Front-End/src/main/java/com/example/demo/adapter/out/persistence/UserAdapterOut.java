@@ -12,9 +12,49 @@ import jakarta.transaction.Transactional;
  */
 @Service
 public class UserAdapterOut implements UserPortOut {
+	
+	/**
+	 * The Class DatabaseOperationException.
+	 */
+	@SuppressWarnings("serial")
+	public class DatabaseOperationException extends RuntimeException {
+	    
+    	/**
+    	 * Instantiates a new database operation exception.
+    	 *
+    	 * @param message the message
+    	 * @param cause the cause
+    	 */
+    	public DatabaseOperationException(String message, Throwable cause) {
+	        super(message, cause);
+	    }
+	}
 
+	/**
+	 * The Class UserSessionException.
+	 */
+	@SuppressWarnings("serial")
+	public class UserSessionException extends RuntimeException {	    
+	    
+    	/**
+    	 * Instantiates a new user session exception.
+    	 *
+    	 * @param message the message
+    	 * @param cause the cause
+    	 */
+    	public UserSessionException(String message, Throwable cause) {
+	        super(message, cause);
+	    }
+	}
+
+	/** The user repository. */
 	private final UserRepository userRepository;
 
+    /**
+     * Instantiates a new user adapter out.
+     *
+     * @param userRepository the user repository
+     */
     public UserAdapterOut(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
@@ -22,44 +62,37 @@ public class UserAdapterOut implements UserPortOut {
 	/**
 	 * Load.
 	 *
-	 * @param user
-	 * @param session_id the session_id
+	 * @param user the user
+	 * @param sessionId the session id
 	 * @param register the register
+	 * @param login the login
 	 * @return the user
 	 */
 	@Override
-	public String load(User user, String session_id, boolean register, boolean login) {
+	public String load(User user, String sessionId, boolean register, boolean login) {
 		String userData = null;
-	    // UserDTO userDTO = null;
 	    
 	    try {
 	        // Llamada al SP
 	        if (register && login) {
-	        	userData = userRepository.loginAndRegister(user.getUsername(), user.getPassw(), user.getName(), 
-	                    user.getLastname1(), user.getLastname2(), user.getCity(), user.getCountry(), user.getAddress(), 
-	                    user.getNumberAddress(), user.getApartment(), user.getZipCode(), user.getPhone(), 
-	                    user.getEmail(), session_id, register, login);
-	        } else if (register && !login) {
-	        	userData = userRepository.loginAndRegister(user.getUsername(), user.getPassw(), user.getName(), 
-	                    user.getLastname1(), user.getLastname2(), user.getCity(), user.getCountry(), user.getAddress(), 
-	                    user.getNumberAddress(), user.getApartment(), user.getZipCode(), user.getPhone(), 
-	                    user.getEmail(), session_id, register, login);
-	        } else if (!register && login) {
-	        	userData = userRepository.login(user.getUsername(), user.getPassw(), session_id);
+	        	userData = userRepository.loginAndRegister(user, sessionId, register, login);
+	        } 
+
+	        if (register && !login) {
+	        	userData = userRepository.loginAndRegister(user, sessionId, register, login);
+	        } 
+
+	        if (!register && login) {
+	        	userData = userRepository.login(user.getUsername(), user.getPassw(), sessionId);
 	        }
 	        
 	        // || userDTO.getId() == null
 	        if (userData == null) {
 		        return null;
 		    }
-            
-            // Siempre poner la contraseña a null antes de devolver
-	        /*if (userDTO != null) {
-	            userDTO.setPassw(null);
-	        }*/
 
-	    } catch (Exception e) {
-	        throw new RuntimeException("DB error: " + e.getMessage(), e);
+	    } catch (org.springframework.dao.DataAccessException e) {
+	    	throw new DatabaseOperationException("Error al procesar la autenticación en la base de datos", e);
 	    }
 
 	    //UserMapper.DTOtoDomain(userDTO)
@@ -69,15 +102,15 @@ public class UserAdapterOut implements UserPortOut {
 	/**
 	 * deleteUserToken.
 	 *
-	 * @param id_session the id_session
+	 * @param sessionId the session id
 	 */
 	@Override
 	@Transactional
-	public void deleteUserToken(String id_session) {
+	public void deleteUserToken(String sessionId) {
 		try {
-			userRepository.deleteUserToken(id_session);
-		} catch (Exception e) {
-			throw new RuntimeException("Internal server error deleting user token", e);
+			userRepository.deleteUserToken(sessionId);
+		} catch (org.springframework.dao.DataAccessException e) {
+			throw new UserSessionException("No se pudo eliminar el token de sesión", e);
 		}
 	}
 
@@ -85,13 +118,14 @@ public class UserAdapterOut implements UserPortOut {
 	 * forgotPassword.
 	 *
 	 * @param email the email
+	 * @return the string
 	 */
 	@Override
 	public String forgotPassword(String email) {
 		try {
 			return userRepository.forgotPassword(email);
-		} catch (Exception e) {
-			throw new RuntimeException("Internal server error sending email", e);
+		} catch (org.springframework.dao.DataAccessException e) {
+			throw new DatabaseOperationException("Error al solicitar recuperación de contraseña para: " + email, e);
 		}
 	}
 
@@ -99,13 +133,15 @@ public class UserAdapterOut implements UserPortOut {
 	 * resetPassword.
 	 *
 	 * @param newPass the newPass
+	 * @param token the token
+	 * @return the integer
 	 */
 	@Override
 	public Integer resetPassword(String newPass, String token) {
 		try {
 			return userRepository.resetPassword(newPass, token);
-		} catch (Exception e) {
-			throw new RuntimeException("Internal server error resetting password", e);
+		} catch (org.springframework.dao.DataAccessException e) {
+			throw new DatabaseOperationException("Error al resetear la contraseña con el token proporcionado", e);
 		}
 	}
 }

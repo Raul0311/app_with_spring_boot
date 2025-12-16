@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.example.demo.adapter.out.persistence.addresses.AddressEntity.AddressType;
 import com.example.demo.domain.Address;
+
 /**
  * The Interface UserPortOut.
  */

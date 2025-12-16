@@ -9,21 +9,42 @@ import com.example.demo.application.ports.in.AddressPortIn;
 import com.example.demo.application.ports.out.AddressPortOut;
 import com.example.demo.domain.Address;
 
+/**
+ * The Class AddressUsecase.
+ */
 @Service
 public class AddressUsecase implements AddressPortIn {
 	
+	/** The address port out. */
 	private final AddressPortOut addressPortOut;
 	
+	/**
+	 * Instantiates a new address usecase.
+	 *
+	 * @param addressPortOut the address port out
+	 */
 	public AddressUsecase(AddressPortOut addressPortOut) {
 		this.addressPortOut = addressPortOut;
 	}
 
+	/**
+	 * Load.
+	 *
+	 * @param userId the user id
+	 * @return the list
+	 */
 	@Override
 	public List<Address> load(Long userId) {
 		
 		return addressPortOut.load(userId);
 	}
 
+	/**
+	 * Save.
+	 *
+	 * @param address the address
+	 * @return the address
+	 */
 	@Override
     public Address save(Address address) {
 		if (address.getUserId() == null) {
@@ -33,6 +54,12 @@ public class AddressUsecase implements AddressPortIn {
         return addressPortOut.save(address);
     }
 
+    /**
+     * Update.
+     *
+     * @param address the address
+     * @return the address
+     */
     @Override
     public Address update(Address address) {
     	if (address.getUserId() == null || address.getId() == null) {
@@ -42,11 +69,24 @@ public class AddressUsecase implements AddressPortIn {
         return addressPortOut.update(address);
     }
 
+    /**
+     * Delete.
+     *
+     * @param userId the user id
+     * @param addressId the address id
+     */
     @Override
     public void delete(Long userId, Long addressId) {
         addressPortOut.delete(userId, addressId);
     }
     
+    /**
+     * Sets the default.
+     *
+     * @param userId the user id
+     * @param addressId the address id
+     * @param type the type
+     */
     @Override
     public void setDefault(Long userId, Long addressId, AddressType type) {
         addressPortOut.setDefault(userId, addressId, type);

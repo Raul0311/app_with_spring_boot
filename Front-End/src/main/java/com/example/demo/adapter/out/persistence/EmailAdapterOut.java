@@ -6,15 +6,30 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.application.ports.out.EmailPortOut;
 
+/**
+ * The Class EmailAdapterOut.
+ */
 @Service
 public class EmailAdapterOut implements EmailPortOut {
 
+	/** The mail sender. */
 	private final JavaMailSender mailSender;
 
+    /**
+     * Instantiates a new email adapter out.
+     *
+     * @param mailSender the mail sender
+     */
     public EmailAdapterOut(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
 
+    /**
+     * Send reset password email.
+     *
+     * @param email the email
+     * @param token the token
+     */
     public void sendResetPasswordEmail(String email, String token) {
         String resetLink = "http://localhost:8080/auth/reset-password?token=" + token;
 

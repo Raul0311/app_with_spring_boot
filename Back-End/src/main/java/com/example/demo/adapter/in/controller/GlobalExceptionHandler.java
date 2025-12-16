@@ -12,6 +12,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    /**
+     * Handle illegal state exception.
+     *
+     * @param ex the ex
+     * @return the response entity
+     */
     // Maneja la IllegalStateException lanzada en RoleUsecase
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<String> handleIllegalStateException(IllegalStateException ex) {

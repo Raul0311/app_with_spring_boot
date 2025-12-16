@@ -1,6 +1,9 @@
 package com.example.demo.application.ports.out;
 
+import java.util.List;
+
 import com.example.demo.domain.User;
+
 /**
  * The Interface UserPortOut.
  */
@@ -18,6 +21,7 @@ public interface UserPortOut {
 	 * ValidateUser.
 	 *
 	 * @param userToken the user token
+	 * @return the long
 	 */
 	Long validateUser(String userToken);
 	
@@ -36,4 +40,12 @@ public interface UserPortOut {
 	 * @return the eliminated user
 	 */
 	void disableUser(Long userId);
+	
+	/**
+	 * Update user roles.
+	 *
+	 * @param userId the user id
+	 * @param roles the roles
+	 */
+	void updateUserRoles(Long userId, List<String> roles);
 }

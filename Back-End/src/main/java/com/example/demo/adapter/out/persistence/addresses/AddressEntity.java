@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * The Class AddressEntity.
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -12,52 +15,68 @@ import lombok.NoArgsConstructor;
 @Table(name = "addresses")
 public class AddressEntity {
     
+    /**
+     * The Enum AddressType.
+     */
     public enum AddressType {
+        
+        /** The billing. */
         BILLING,
+        
+        /** The shipping. */
         SHIPPING
     }
 
+	/** The id. */
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 	
+	/** The type. */
 	@Enumerated(EnumType.STRING)
     private AddressType type;
 	
+	/** The name. */
 	@Column(name = "name", nullable = false)
     private String name;
 	
+	/** The lastname 1. */
 	@Column(name = "lastname1", nullable = false)
     private String lastname1;
 	
+	/** The lastname 2. */
 	@Column(name = "lastname2", nullable = false)
     private String lastname2;
 
-	@Column(name = "address", nullable = false)
-    private String address;
+	/** The street. */
+	@Column(name = "street", nullable = false)
+    private String street;
 
+    /** The number address. */
     @Column(name = "number_address", nullable = false)
     private String numberAddress;
 
+    /** The apartment. */
     @Column(name = "apartment")
     private String apartment;
 
+    /** The city. */
     @Column(name = "city", nullable = false)
     private String city;
 
+    /** The zip code. */
     @Column(name = "zip_code", nullable = false)
     private String zipCode;
 
+    /** The country. */
     @Column(name = "country", nullable = false)
     private String country;
 
+    /** The user id. */
     @Column(name = "user_id", nullable = false)
     private Long userId;
     
+    /** The predeterminated. */
     @Column(name = "predeterminated")
     private Boolean predeterminated;
-
-    // Relación con órdenes de facturación (opcional)
-    // @OneToMany(mappedBy = "billingAddress")
-    // private List<Order> orders;
 }

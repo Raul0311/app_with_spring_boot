@@ -16,9 +16,21 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * The Class CustomAuthFailureHandler.
+ */
 @Component
 public class CustomAuthFailureHandler implements AuthenticationFailureHandler {
 
+	/**
+	 * On authentication failure.
+	 *
+	 * @param request the request
+	 * @param response the response
+	 * @param exception the exception
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws ServletException the servlet exception
+	 */
 	@Override
 	public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.security.core.AuthenticationException exception) throws IOException, ServletException {

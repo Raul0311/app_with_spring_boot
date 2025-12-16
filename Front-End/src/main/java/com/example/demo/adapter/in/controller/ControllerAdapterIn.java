@@ -1,6 +1,5 @@
 package com.example.demo.adapter.in.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,18 +8,44 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.example.demo.application.ports.in.UserPortIn;
 
+/**
+ * The Class ControllerAdapterIn.
+ */
 @Controller
 public class ControllerAdapterIn {
 	
-	@Autowired	
-	private UserPortIn userPortIn;
+	/** The user port in. */
+	private final UserPortIn userPortIn;
+	
+	/**
+	 * Instantiates a new controller adapter in.
+	 *
+	 * @param userPortIn the user port in
+	 */
+	public ControllerAdapterIn(UserPortIn userPortIn) {
+		this.userPortIn = userPortIn;
+	}
 
+    /**
+     * Root.
+     *
+     * @return the string
+     */
     // Redirige "/" a "/login"
     @GetMapping("/")
     public String root() {
         return "redirect:/auth";
     }
 
+    /**
+     * Auth.
+     *
+     * @param error the error
+     * @param logout the logout
+     * @param registered the registered
+     * @param auth the auth
+     * @return the model and view
+     */
     // Página de login
     @GetMapping("/auth/**")
     public ModelAndView auth(@RequestParam(required = false) String error,
@@ -47,12 +72,24 @@ public class ControllerAdapterIn {
         return model;
     }
     
+    /**
+     * Home.
+     *
+     * @return the string
+     */
     // Página privada
     @GetMapping("/private/home")
     public String home() {
         return "private/home"; 
     }
     
+    /**
+     * Register.
+     *
+     * @param error the error
+     * @param auth the auth
+     * @return the model and view
+     */
     @GetMapping("/register")
     public ModelAndView register(@RequestParam(required = false) String error,
                               Authentication auth) {
@@ -60,6 +97,13 @@ public class ControllerAdapterIn {
     	return new ModelAndView("redirect:/auth/register");
     }
     
+    /**
+     * Forgot password.
+     *
+     * @param error the error
+     * @param auth the auth
+     * @return the model and view
+     */
     @GetMapping("/forgot-password")
     public ModelAndView forgotPassword(@RequestParam(required = false) String error,
             Authentication auth) {
@@ -67,6 +111,13 @@ public class ControllerAdapterIn {
         return new ModelAndView("redirect:/auth/forgot-password");
     }
     
+    /**
+     * Reset password.
+     *
+     * @param error the error
+     * @param auth the auth
+     * @return the model and view
+     */
     @GetMapping("/reset-password")
     public ModelAndView resetPassword(@RequestParam(required = false) String error,
             Authentication auth) {

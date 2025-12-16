@@ -1,9 +1,16 @@
 package com.example.demo.adapter.out.persistence.user;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.example.demo.adapter.out.persistence.roles.RoleEntity;
+import com.example.demo.adapter.out.persistence.roles.RoleRepository;
+import com.example.demo.adapter.out.persistence.roles.UserRolesEntity;
 import com.example.demo.application.ports.out.UserPortOut;
 import com.example.demo.domain.User;
 
@@ -13,70 +20,160 @@ import com.example.demo.domain.User;
 @Service
 public class UserAdapterOut implements UserPortOut {
 	
+	/**
+	 * The Class UserNotFoundException.
+	 */
 	@SuppressWarnings("serial")
 	public class UserNotFoundException extends RuntimeException {
-	    public UserNotFoundException(String message) {
+	    
+    	/**
+    	 * Instantiates a new user not found exception.
+    	 *
+    	 * @param message the message
+    	 */
+    	public UserNotFoundException(String message) {
 	        super(message);
 	    }
 	}
 	
+	/**
+	 * The Class UserDisableException.
+	 */
 	@SuppressWarnings("serial")
 	public class UserDisableException extends RuntimeException {
-	    public UserDisableException(String message) {
+	    
+    	/**
+    	 * Instantiates a new user disable exception.
+    	 *
+    	 * @param message the message
+    	 */
+    	public UserDisableException(String message) {
 	        super(message);
 	    }
 	}
 	
+	/**
+	 * The Class UserUpdateException.
+	 */
 	@SuppressWarnings("serial")
 	public class UserUpdateException extends RuntimeException {
-	    public UserUpdateException(String message) {
+	    
+    	/**
+    	 * Instantiates a new user update exception.
+    	 *
+    	 * @param message the message
+    	 */
+    	public UserUpdateException(String message) {
 	        super(message);
 	    }
 	}
 
+	/** The user repository. */
 	private final UserRepository userRepository;
+	
+	/** The role repository. */
+	private final RoleRepository roleRepository;
+	
+	/** The user mapper. */
+	private final UserMapper userMapper;
 
-    public UserAdapterOut(UserRepository userRepository) {
+    /**
+     * Instantiates a new user adapter out.
+     *
+     * @param userRepository the user repository
+     * @param userMapper the user mapper
+     * @param roleRepository the role repository
+     */
+    public UserAdapterOut(UserRepository userRepository, UserMapper userMapper, RoleRepository roleRepository) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
+        this.roleRepository = roleRepository;
     }
 
+    /**
+     * Validate user.
+     *
+     * @param userToken the user token
+     * @return the long
+     */
     @Override
     public Long validateUser(String userToken) {
         return userRepository.validateUserTokenByUserToken(userToken);
     }
 
+    /**
+     * Load.
+     *
+     * @param userId the user id
+     * @return the user
+     */
     @Override
     public User load(Long userId) {
         UserEntity userEntity = userRepository.findById(userId)
             .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con id: " + userId));
         userEntity.setPassw(null);
 
-        return UserMapper.toDomain(userEntity);
+        return userMapper.toDomain(userEntity);
     }
 
+	/**
+	 * Update.
+	 *
+	 * @param user the user
+	 * @return the user
+	 */
 	@Override
+	@Transactional
 	public User update(User user) {
-		Long userId = user.getId();
+		UserEntity userEntity = userRepository.findById(user.getId())
+	            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 		
-		if (!userRepository.existsById(user.getId())) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
-		UserEntity userEntity = UserMapper.toEntity(user);
-		
-		Integer result = userRepository.updateUser(userEntity.getUsername(), userEntity.getName(), userEntity.getLastname1(), 
-				userEntity.getLastname2(), userEntity.getEmail(), userEntity.getPhone(), userEntity.getAddress(), userEntity.getNumberAddress(), 
-				userEntity.getApartment(), userEntity.getCity(), userEntity.getZipCode(), userEntity.getCountry(), userEntity.getId());
-		
-        if (result == 0) throw new UserUpdateException("No se pudo actualizar el perfil del usuario con ID: " + user.getId());
-        
-        UserEntity newUserEntity = userRepository.findById(userId)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User updated but not found for fetching"));
-        return UserMapper.toDomain(newUserEntity);
+		userMapper.updateEntityFromDomain(user, userEntity);
+
+	    return userMapper.toDomain(userEntity);
 	}
 
+	/**
+	 * Disable user.
+	 *
+	 * @param userId the user id
+	 */
 	@Override
 	public void disableUser(Long userId) {
 		Integer updated = userRepository.disableUser(userId);
 		if (updated == 0) throw new UserDisableException("No se ha podido eliminar la cuenta");
+	}
+	
+	/**
+	 * Update user roles.
+	 *
+	 * @param userId the user id
+	 * @param roles the roles
+	 */
+	@Override
+	@Transactional
+	public void updateUserRoles(Long userId, List<String> roles) {
+
+	    UserEntity user = userRepository.findById(userId)
+	            .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
+
+	    // Borrar relaciones actuales
+	    user.setUserRoles(new ArrayList<>());
+
+	    // Buscar roles existentes
+	    List<RoleEntity> roleEntities = roleRepository.findByRoleNameIn(roles);
+
+	    if (roleEntities.size() != roles.size()) {
+	        throw new IllegalArgumentException("Uno o más roles no existen");
+	    }
+
+	    // Crear relaciones nuevas
+	    List<UserRolesEntity> relations = roleEntities.stream()
+	            .map(role -> new UserRolesEntity(user, role))
+	            .toList();
+
+	    user.getUserRoles().addAll(relations);
+
+	    userRepository.save(user);
 	}
 }

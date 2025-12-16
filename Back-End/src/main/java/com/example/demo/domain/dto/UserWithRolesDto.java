@@ -5,12 +5,21 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * The Class UserWithRolesDto.
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 public class UserWithRolesDto {
+    
+    /** The id. */
     private Long id;
+    
+    /** The username. */
     private String username;
+    
+    /** The roles. */
     private List<RoleDto> roles;
 }
 
