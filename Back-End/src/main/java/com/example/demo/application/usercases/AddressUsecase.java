@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.example.demo.adapter.out.persistence.AddressEntity.AddressType;
+import com.example.demo.adapter.out.persistence.addresses.AddressEntity.AddressType;
 import com.example.demo.application.ports.in.AddressPortIn;
 import com.example.demo.application.ports.out.AddressPortOut;
 import com.example.demo.domain.Address;
@@ -25,21 +25,21 @@ public class AddressUsecase implements AddressPortIn {
 	}
 
 	@Override
-    public void save(Address address) {
+    public Address save(Address address) {
 		if (address.getUserId() == null) {
             throw new IllegalArgumentException("userId es obligatorio en la dirección");
         }
 		
-        addressPortOut.save(address);
+        return addressPortOut.save(address);
     }
 
     @Override
-    public void update(Address address) {
+    public Address update(Address address) {
     	if (address.getUserId() == null || address.getId() == null) {
             throw new IllegalArgumentException("userId y id de dirección son obligatorios");
         }
     	
-        addressPortOut.update(address);
+        return addressPortOut.update(address);
     }
 
     @Override

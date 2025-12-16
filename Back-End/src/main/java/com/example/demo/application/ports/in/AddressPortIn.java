@@ -2,7 +2,7 @@ package com.example.demo.application.ports.in;
 
 import java.util.List;
 
-import com.example.demo.adapter.out.persistence.AddressEntity.AddressType;
+import com.example.demo.adapter.out.persistence.addresses.AddressEntity.AddressType;
 import com.example.demo.domain.Address;
 
 /**
@@ -23,14 +23,14 @@ public interface AddressPortIn {
 	 *
 	 * @param address the address
 	 */
-	void save(Address address);
+	Address save(Address address);
 
 	/**
 	 * Update.
 	 *
 	 * @param address the address
 	 */
-    void update(Address address);
+	Address update(Address address);
 
     /**
 	 * Delete.

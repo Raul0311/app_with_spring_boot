@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,11 +16,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.example.demo.adapter.out.persistence.AddressEntity.AddressType;
+import com.example.demo.adapter.out.persistence.addresses.AddressEntity.AddressType;
 import com.example.demo.application.ports.in.AddressPortIn;
+import com.example.demo.application.ports.in.RolesPortIn;
 import com.example.demo.application.ports.in.UserPortIn;
+import com.example.demo.application.rolecases.RoleUpdateCommand;
 import com.example.demo.domain.Address;
 import com.example.demo.domain.User;
+import com.example.demo.domain.dto.RoleCreationDto;
+import com.example.demo.domain.dto.RoleDto;
+import com.example.demo.domain.dto.UserWithRolesDto;
 
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -28,10 +34,12 @@ import io.swagger.v3.oas.annotations.Operation;
 public class ControllerAdapterIn {
 	private final AddressPortIn addressPortIn;
 	private final UserPortIn userPortIn;
+	private final RolesPortIn rolesPortIn;
 	
-	public ControllerAdapterIn(AddressPortIn addressPortIn, UserPortIn userPortIn) {
+	public ControllerAdapterIn(AddressPortIn addressPortIn, UserPortIn userPortIn, RolesPortIn rolesPortIn) {
         this.addressPortIn = addressPortIn;
         this.userPortIn = userPortIn;
+        this.rolesPortIn = rolesPortIn;
     }
 
 	@GetMapping("/getAddresses")
@@ -44,28 +52,20 @@ public class ControllerAdapterIn {
 	
 	@PostMapping("/setAddress")
 	@Operation(summary = "Crear una dirección", description = "Crea una dirección ya sea de facturación o de envío del usuario")
-    public ResponseEntity<Void> createAddress(Authentication authentication,
+    public Address createAddress(Authentication authentication,
                                        @RequestBody Address address) {
 		Long userId = (Long) authentication.getPrincipal();
 		address.setUserId(userId);
-		addressPortIn.save(address);
 		
-        return ResponseEntity.ok().build();
+        return addressPortIn.save(address);
     }
 
     @PutMapping("/updateAddress")
     @Operation(summary = "Modificar una dirección", description = "Modifica una dirección ya sea de facturación o de envío del usuario")
-    public ResponseEntity<Void> updateAddress(Authentication authentication,
+    public Address updateAddress(Authentication authentication,
                                        @RequestBody Address address) {
-    	Long userId = (Long) authentication.getPrincipal();
     	
-    	if (address.getUserId() == null || !address.getUserId().equals(userId)) {
-            // Esto es un error de autorización. Debería ser 403 Forbidden.
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-    	
-        addressPortIn.update(address);
-        return ResponseEntity.ok().build();
+        return addressPortIn.update(address);
     }
 
     @DeleteMapping("/deleteAddress/{id}")
@@ -98,15 +98,9 @@ public class ControllerAdapterIn {
     
     @PutMapping("/updateUser")
     @Operation(summary = "Modificar el usuario", description = "Modifica el usuario por id")
-    public ResponseEntity<Void> updateUser(Authentication authentication, @RequestBody User user) {
-    	Long userId = (Long) authentication.getPrincipal();
+    public User updateUser(Authentication authentication, @RequestBody User user) {
     	
-    	if (!user.getId().equals(userId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-       }
-    	
-    	userPortIn.update(user);
-        return ResponseEntity.ok().build();
+        return userPortIn.update(user);
     }
     
     @PutMapping("/users/disable")
@@ -116,5 +110,46 @@ public class ControllerAdapterIn {
     	
         userPortIn.disableUser(userId);
         return ResponseEntity.ok().build();
+    }
+    
+    @GetMapping("/admin/usersWithRoles")
+    @Operation(summary = "Obtener usuarios con roles", description = "Devuelve todos los usuarios con los roles de cada uno")
+    public ResponseEntity<List<UserWithRolesDto>> listAllUsersWithRoles(Authentication authentication) {
+
+        return ResponseEntity.ok(rolesPortIn.getAllUsersWithRoles());
+    }
+    
+    @GetMapping("/admin/roles")
+    @Operation(summary = "Obtener roles", description = "Devuelve todos los roles que tiene la aplicación")
+    public ResponseEntity<List<RoleDto>> listAllRoles(Authentication authentication) {
+
+        return ResponseEntity.ok(rolesPortIn.getAllRoles());
+    }
+    
+    @PutMapping("/admin/updateUserRoles")
+    @Operation(summary = "Actualizar roles", description = "Actualiza los roles que se han cambiado")
+    public ResponseEntity<Void> updateUserRoles(Authentication authentication, @RequestBody RoleUpdateCommand command) {
+    	Long authenticatedUserId = (Long) authentication.getPrincipal();
+    	
+    	rolesPortIn.updateUserRoles(authenticatedUserId, command);
+        return ResponseEntity.noContent().build();
+    }
+    
+    @PostMapping("/admin/roles") 
+    @Operation(summary = "Crear un nuevo rol", description = "Crea un nuevo rol con nombre y descripción.")
+    public ResponseEntity<Void> createNewRole(Authentication authentication, @RequestBody RoleCreationDto roleDto) {
+        rolesPortIn.createNewRole(roleDto);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+    
+    @DeleteMapping("/admin/roles/{roleName}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')") 
+    @Operation(summary = "Eliminar un rol", description = "Elimina un rol existente que no sea ROLE_ADMIN o ROLE_USER.")
+    public ResponseEntity<Void> deleteRole(
+        Authentication authentication, 
+        @PathVariable String roleName
+    ) {
+        rolesPortIn.deleteRole(roleName);
+        return ResponseEntity.noContent().build();
     }
 }

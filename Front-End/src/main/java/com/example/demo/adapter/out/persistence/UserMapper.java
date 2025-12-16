@@ -46,7 +46,7 @@ public class UserMapper {
      * @param userDTO the user DTO
      * @return the user domain object
      */
-    public static User DTOtoDomain(UserDTO userDTO) {
+    public static User DTOtoDomain(UserDto userDTO) {
         User user = new User();
         user.setId(userDTO.getId());
         user.setUsername(userDTO.getUsername());

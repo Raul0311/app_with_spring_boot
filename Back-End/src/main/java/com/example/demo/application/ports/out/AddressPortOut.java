@@ -2,7 +2,7 @@ package com.example.demo.application.ports.out;
 
 import java.util.List;
 
-import com.example.demo.adapter.out.persistence.AddressEntity.AddressType;
+import com.example.demo.adapter.out.persistence.addresses.AddressEntity.AddressType;
 import com.example.demo.domain.Address;
 /**
  * The Interface UserPortOut.
@@ -21,9 +21,9 @@ public interface AddressPortOut {
 	 * Save.
 	 *
 	 * @param address the address
-	 * @return the addresses
+	 * @return the address
 	 */
-	void save(Address address);
+	Address save(Address address);
 
 	/**
 	 * Update.
@@ -31,7 +31,7 @@ public interface AddressPortOut {
 	 * @param address the address
 	 * @return the addresses
 	 */
-	void update(Address address);
+	Address update(Address address);
 
     /**
 	 * Delete.

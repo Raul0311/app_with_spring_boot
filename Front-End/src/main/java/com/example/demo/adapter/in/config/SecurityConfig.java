@@ -40,7 +40,7 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http, CustomAuthFailureHandler failureHandler) throws Exception {
         http
         	.authorizeHttpRequests(auth -> auth
-    			.requestMatchers("/private/**").hasRole("USER")
+    			.requestMatchers("/private/**").hasAnyRole("USER", "ADMIN")
     			// "/auth", "/register", "/auth/register", "/static/**"
         	    .requestMatchers("/**").permitAll()
             )

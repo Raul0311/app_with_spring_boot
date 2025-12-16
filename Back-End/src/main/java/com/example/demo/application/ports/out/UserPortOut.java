@@ -27,7 +27,7 @@ public interface UserPortOut {
 	 * @param user the user
 	 * @return the updated user
 	 */
-	void update(User user);
+	User update(User user);
 	
 	/**
 	 * DisableUser.

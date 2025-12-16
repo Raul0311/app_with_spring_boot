@@ -36,7 +36,7 @@ class UserAdapterOutTest {
         input.setPassw("123");
 
         // Preparar DTO simulado del repositorio
-        UserDTO dto = new UserDTO();
+        UserDto dto = new UserDto();
         dto.setId(1L);
         dto.setUsername("test");
         dto.setUserToken("abc123");
