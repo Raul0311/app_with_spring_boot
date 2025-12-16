@@ -5,8 +5,8 @@
 	<meta charset="utf-8" />
 	<meta name="description" content="Web site created using create-react-app" />
 	<title>React App</title>
-	<script defer="defer" src="${pageContext.request.contextPath}/static/js/main.a5a305e8.js"></script>
-	<link href="${pageContext.request.contextPath}/static/css/main.4c5df67c.css" rel="stylesheet">
+	<script defer="defer" src="${pageContext.request.contextPath}/static/js/main.61a79c85.js"></script>
+	<link href="${pageContext.request.contextPath}/static/css/main.10226a25.css" rel="stylesheet">
 </head>
 <body>
 	<div id="root" data-csrf-token="${_csrf.token}"></div>

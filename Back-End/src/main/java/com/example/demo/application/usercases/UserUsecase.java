@@ -22,9 +22,9 @@ public class UserUsecase implements UserPortIn {
 	}
 
 	@Override
-	public void update(User user) {
+	public User update(User user) {
 		
-		userPortOut.update(user);
+		return userPortOut.update(user);
 	}
 
 	@Override

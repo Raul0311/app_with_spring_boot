@@ -190,10 +190,11 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         } catch (Exception e) {
             throw new RuntimeException("Error parsing user JSON", e);
         }
-        
+        System.out.println(user.getRolesStr());
         // Guardar en sesión
         session.setAttribute("userToken", user.getUserToken());
         session.setAttribute("userId", user.getId());
+        session.setAttribute("userRoles", user.getRolesStr());
         
         List<String> roles = Arrays.asList(user.getRolesStr().split("\\|"));
         user.setRoles(roles);
